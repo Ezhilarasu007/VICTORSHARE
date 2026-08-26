@@ -57,11 +57,11 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
     setCompletedFile(null);
   };
 
-  // Inspect Code and display file/folder metadata
+  // Inspect Transfer Code
   const handleVerifyCode = (presetCode) => {
     const code = presetCode || codeInput;
     if (code.replaceAll('-', '').length < 6) {
-      setErrorMessage('Please enter a valid 6-digit Transfer Code');
+      setErrorMessage('Please enter a valid 6-digit Encrypted Transfer Code');
       return;
     }
 
@@ -72,35 +72,31 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
     setTimeout(() => {
       setIsVerifying(false);
       
-      // Inspect Code details
       let meta = {
         name: 'RAW_8K_CINEMATIC_MASTER_100GB.mov',
-        category: 'video',
+        category: 'VIDEO',
         sizeBytes: gbToBytes(100),
-        itemCount: 1,
-        sender: 'Worldwide Peer (iOS / Android / PC)'
+        sender: 'Sender Device (iOS / Android / PC)'
       };
 
       if (code.includes('418') || code.includes('app')) {
         meta = {
-          name: 'VICTORSHARE_PRO_V3.2.1.apk (Android App)',
-          category: 'app',
+          name: 'VICTORSHARE_PRO_V3.2.1.apk',
+          category: 'APP',
           sizeBytes: 154 * 1024 * 1024,
-          itemCount: 1,
           sender: 'Android Device Peer'
         };
       } else if (code.includes('914') || code.includes('pdf')) {
         meta = {
-          name: 'COMPLETE_PROJECT_SPECIFICATIONS_2026.pdf',
-          category: 'pdf',
+          name: 'PROJECT_DOCUMENTS_BUNDLE.pdf',
+          category: 'PDF',
           sizeBytes: 45 * 1024 * 1024,
-          itemCount: 1,
           sender: 'Desktop Peer'
         };
       }
 
       setVerifiedFileMeta(meta);
-      showToast(`AES-256 Encrypted Channel Verified! Found ${meta.name}`);
+      showToast(`🔒 Encrypted P2P Pipe Verified! Found ${meta.name}`);
     }, 450);
   };
 
@@ -136,9 +132,9 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
         setIsReceiving(false);
         setCompletedFile(verifiedFileMeta);
         
-        // AUTOMATIC SILENT DIRECT DOWNLOAD (NO ALERT POPUPS!)
+        // DIRECT SILENT DOWNLOAD INTO DEVICE STORAGE (NO ALERT POPUPS!)
         triggerDirectDownload(verifiedFileMeta.name);
-        showToast(`✓ ${verifiedFileMeta.name} downloaded directly to device storage`);
+        showToast(`✓ ${verifiedFileMeta.name} downloaded directly into your device storage!`);
       }
       setReceiveProgress(pct);
     }, 150);
@@ -147,7 +143,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
   const handleManualSave = () => {
     if (completedFile) {
       triggerDirectDownload(completedFile.name);
-      showToast(`✓ Downloading ${completedFile.name}... Check your Downloads folder!`);
+      showToast(`✓ Downloading ${completedFile.name}... Saved to device Downloads!`);
     }
   };
 
@@ -165,11 +161,11 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
   };
 
   const getCategoryIcon = (cat) => {
-    if (cat === 'video') return Film;
-    if (cat === 'image') return Image;
-    if (cat === 'app') return Package;
-    if (cat === 'pdf') return FileText;
-    if (cat === 'folder') return Folder;
+    if (cat === 'VIDEO') return Film;
+    if (cat === 'PHOTO') return Image;
+    if (cat === 'APP') return Package;
+    if (cat === 'PDF') return FileText;
+    if (cat === 'FOLDER') return Folder;
     return HardDrive;
   };
 
@@ -178,7 +174,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
   return (
     <div className="space-y-8 max-w-4xl mx-auto px-4 py-6 relative">
       
-      {/* Toast Notification Banner */}
+      {/* Toast Banner (No Browser Popups!) */}
       {toastMessage && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 text-xs font-bold shadow-2xl flex items-center space-x-2 animate-bounce">
           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
@@ -190,7 +186,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
       <div className="flex items-center justify-between">
         <button
           onClick={onBackHome}
-          className="flex items-center space-x-2 text-slate-400 hover:text-white bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800 transition-all text-xs font-bold"
+          className="flex items-center space-x-2 text-slate-400 hover:text-white bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-800 transition-all text-xs font-bold"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Home</span>
@@ -198,14 +194,14 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
 
         <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold">
           <Lock className="w-4 h-4 text-purple-400" />
-          <span>Encrypted Direct P2P Channel</span>
+          <span>100% Private Encrypted Transfer</span>
         </div>
       </div>
 
       {/* Title */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl sm:text-4xl font-black text-white">Receive Shared File or Video</h1>
-        <p className="text-xs text-slate-400">Enter the sender's 6-digit Transfer Code to download directly.</p>
+        <p className="text-xs text-slate-400">Enter the sender's 6-digit Transfer Code to download directly into your storage.</p>
       </div>
 
       {/* Main Receive Card */}
@@ -236,13 +232,13 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
             <button
               onClick={() => { setCodeInput('325-600'); handleVerifyCode('325-600'); }}
-              className="px-3 py-1.5 rounded-xl bg-purple-950/80 hover:bg-purple-900 border border-purple-700 text-xs font-mono font-bold text-purple-300"
+              className="px-3.5 py-1.5 rounded-xl bg-purple-950/90 hover:bg-purple-900 border border-purple-700 text-xs font-mono font-bold text-purple-300 shadow-md"
             >
               🎬 Code: 325-600 (100GB Movie)
             </button>
             <button
               onClick={() => { setCodeInput('418-739'); handleVerifyCode('418-739'); }}
-              className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300 shadow-md"
             >
               📦 Code: 418-739 (APK App)
             </button>
@@ -293,12 +289,12 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
                 <span>Verifying Encrypted Code...</span>
               </span>
             ) : (
-              <span>Verify Code & Inspect File</span>
+              <span>Verify Code & Inspect Shared File</span>
             )}
           </button>
         )}
 
-        {/* STEP 2: Revealed Shared File Card */}
+        {/* STEP 2: Revealed Shared File Details Card */}
         {verifiedFileMeta && (
           <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-950 to-purple-950/60 border-2 border-purple-500/50 text-left space-y-4 animate-fade-in shadow-2xl">
             
@@ -316,7 +312,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
               <div>
                 <h3 className="text-base font-black text-white">{verifiedFileMeta.name}</h3>
                 <p className="text-xs text-slate-300 font-mono mt-0.5">
-                  Category: {verifiedFileMeta.category.toUpperCase()} • Size: {formatBytes(verifiedFileMeta.sizeBytes)}
+                  Category: <span className="text-purple-300 font-bold">{verifiedFileMeta.category}</span> • Size: <span className="text-emerald-400 font-bold">{formatBytes(verifiedFileMeta.sizeBytes)}</span>
                 </p>
               </div>
             </div>
@@ -336,7 +332,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
             {isReceiving && (
               <div className="space-y-2 pt-2">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-purple-300 font-bold">Downloading Stream...</span>
+                  <span className="text-purple-300 font-bold">Downloading Encrypted Stream...</span>
                   <span className="text-emerald-400 font-bold">{downloadSpeed} MB/s</span>
                 </div>
                 <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden">
@@ -359,7 +355,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
                   <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  <span>Download Finished! Saved directly to device downloads.</span>
+                  <span>Saved directly to your device storage!</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
