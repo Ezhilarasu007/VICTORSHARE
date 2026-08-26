@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown, Music, Image, Zap, Lock, Sparkles, BarChart2, Disc, Layers } from 'lucide-react';
+import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown, Music, Image, Zap, Lock, Sparkles, BarChart2, Disc, Menu, X } from 'lucide-react';
 import { useLanguage } from '../utils/languageStore';
 
 export function Header({ activeTab, setActiveTab, openPermissionsModal, openDonateModal, openGuideModal }) {
   const { lang, setLang, t, LANGUAGES } = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const activeLangObj = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
 
+  const handleMobileNav = (tab) => {
+    setActiveTab(tab);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
+    <header className="sticky top-0 z-40 backdrop-blur-md bg-slate-950/85 border-b border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
         
         {/* Logo */}
@@ -35,8 +41,8 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
           </div>
         </div>
 
-        {/* Navigation Pills */}
-        <nav className="hidden md:flex items-center space-x-1 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+        {/* PC Desktop Navigation Pills */}
+        <nav className="hidden lg:flex items-center space-x-1 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
           <button
             onClick={() => setActiveTab('home')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -194,50 +200,63 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
             <span className="hidden sm:inline">{t('donate')}</span>
           </button>
 
-          {/* Language Selector Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsLangOpen(!isLangOpen)}
-              className="px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 flex items-center space-x-1.5 transition-all"
-            >
-              <Globe className="w-4 h-4 text-cyan-400" />
-              <span>{activeLangObj.flag}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
-            </button>
-
-            {isLangOpen && (
-              <div className="absolute right-0 mt-2 w-48 glass-panel rounded-2xl p-2 border border-slate-700 shadow-2xl z-50 space-y-1">
-                {LANGUAGES.map((l) => (
-                  <button
-                    key={l.code}
-                    onClick={() => {
-                      setLang(l.code);
-                      setIsLangOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all ${
-                      lang === l.code ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <span>{l.flag}</span>
-                    <span>{l.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Permissions Status */}
+          {/* Mobile Hamburger Toggle Button */}
           <button
-            onClick={openPermissionsModal}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-all"
-            title="Manage Permissions"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 lg:hidden"
           >
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
         </div>
 
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-slate-950 border-b border-slate-800 p-4 space-y-2 text-left animate-fade-in">
+          <button onClick={() => handleMobileNav('home')} className="w-full px-4 py-2.5 rounded-xl bg-slate-900 text-xs font-bold text-cyan-300">
+            🏠 Home
+          </button>
+          <button onClick={() => handleMobileNav('send')} className="w-full px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs flex items-center gap-2">
+            <Send className="w-4 h-4" /> Send File or Video
+          </button>
+          <button onClick={() => handleMobileNav('receive')} className="w-full px-4 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-xs flex items-center gap-2">
+            <Download className="w-4 h-4" /> Receive File or Video
+          </button>
+          <button onClick={() => handleMobileNav('compressor')} className="w-full px-4 py-2.5 rounded-xl bg-slate-900 text-xs font-bold text-emerald-400 flex items-center gap-2">
+            <Sliders className="w-4 h-4" /> Video Compressor
+          </button>
+
+          <div className="pt-2 border-t border-slate-800 grid grid-cols-2 gap-2 text-xs font-bold">
+            <button onClick={() => handleMobileNav('visualizer')} className="p-2.5 rounded-xl bg-slate-900 text-cyan-300 flex items-center gap-1.5">
+              <Disc className="w-4 h-4 text-cyan-400" /> Visualizer
+            </button>
+            <button onClick={() => handleMobileNav('phonk-generator')} className="p-2.5 rounded-xl bg-slate-900 text-pink-300 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-pink-400" /> Phonk Studio
+            </button>
+            <button onClick={() => handleMobileNav('youtube-seo')} className="p-2.5 rounded-xl bg-slate-900 text-purple-300 flex items-center gap-1.5">
+              <BarChart2 className="w-4 h-4 text-purple-400" /> YouTube SEO
+            </button>
+            <button onClick={() => handleMobileNav('audio-extractor')} className="p-2.5 rounded-xl bg-slate-900 text-slate-300 flex items-center gap-1.5">
+              <Music className="w-4 h-4 text-purple-400" /> Audio Extract
+            </button>
+            <button onClick={() => handleMobileNav('image-optimizer')} className="p-2.5 rounded-xl bg-slate-900 text-emerald-300 flex items-center gap-1.5">
+              <Image className="w-4 h-4 text-emerald-400" /> Image Opt
+            </button>
+            <button onClick={() => handleMobileNav('speed-test')} className="p-2.5 rounded-xl bg-slate-900 text-cyan-300 flex items-center gap-1.5">
+              <Zap className="w-4 h-4 text-cyan-400" /> Speed Test
+            </button>
+            <button onClick={() => handleMobileNav('admin')} className="p-2.5 rounded-xl bg-rose-950 text-rose-300 border border-rose-500/40 flex items-center gap-1.5">
+              <Lock className="w-4 h-4 text-rose-400" /> Admin Portal
+            </button>
+            <button onClick={() => handleMobileNav('reviews')} className="p-2.5 rounded-xl bg-amber-950 text-amber-300 border border-amber-500/40 flex items-center gap-1.5">
+              <Star className="w-4 h-4 fill-current text-amber-400" /> Ratings
+            </button>
+          </div>
+        </div>
+      )}
+
     </header>
   );
 }
