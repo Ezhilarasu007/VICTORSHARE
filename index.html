@@ -12,11 +12,28 @@
     <title>VictorShare — Universal P2P File & Video Transfer (10MB to 10TB+)</title>
     <meta name="description" content="Send & receive files up to 10TB+ instantly between iOS, Android, Windows & Mac with 100% End-to-End Encryption." />
 
-    <!-- Google Tag (gtag.js) for G-8N2192DVQ2, G-SJYH7015FT, GT-WFFPJQSJ, AW-18376509974 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8N2192DVQ2"></script>
+    <!-- Google Consent Mode v2 Default Configuration (EEA & Global Compliance) -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+
+      // Set default consent state before any Google tags fire
+      gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied',
+        'wait_for_update': 500
+      });
+
+      // Enable URL Passthrough & Data Redaction
+      gtag('set', 'url_passthrough', true);
+      gtag('set', 'ads_data_redaction', true);
+    </script>
+
+    <!-- Google Tag (gtag.js) for G-8N2192DVQ2, G-SJYH7015FT, GT-WFFPJQSJ, AW-18376509974 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8N2192DVQ2"></script>
+    <script>
       gtag('js', new Date());
 
       // Firebase Analytics Tag

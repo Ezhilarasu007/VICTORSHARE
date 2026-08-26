@@ -17,6 +17,7 @@ import { PermissionsModal } from './components/PermissionsModal';
 import { DonateModal } from './components/DonateModal';
 import { InfoModal } from './components/InfoModal';
 import { GuideModal } from './components/GuideModal';
+import { CookieBanner } from './components/CookieBanner';
 import { LanguageProvider } from './utils/languageStore';
 import { Shield, Lock, Heart, Globe, Mail, Star, HelpCircle, AlertCircle } from 'lucide-react';
 
@@ -244,7 +245,9 @@ export default function App() {
           </div>
         </footer>
 
-        {/* Modals */}
+        {/* Modals & Consent Banners */}
+        <CookieBanner />
+
         <PermissionsModal
           isOpen={isPermissionsOpen}
           onClose={() => setIsPermissionsOpen(false)}
