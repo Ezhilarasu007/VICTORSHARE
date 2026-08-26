@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/Header';
 import { HomePage } from './components/HomePage';
 import { SendPage } from './components/SendPage';
@@ -121,6 +122,9 @@ export function App() {
           </div>
         </div>
       </footer>
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
 
     </div>
   );
