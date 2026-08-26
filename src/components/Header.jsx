@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown } from 'lucide-react';
+import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown, Music, Image, Zap } from 'lucide-react';
 import { useLanguage } from '../utils/languageStore';
 
 export function Header({ activeTab, setActiveTab, openPermissionsModal, openDonateModal, openGuideModal }) {
   const { lang, setLang, t, LANGUAGES } = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
 
   const activeLangObj = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
 
@@ -38,7 +39,7 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
         <nav className="hidden md:flex items-center space-x-1 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
           <button
             onClick={() => setActiveTab('home')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'home' ? 'bg-slate-800 text-cyan-300 shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -47,7 +48,7 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
 
           <button
             onClick={() => setActiveTab('send')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1 transition-all ${
               activeTab === 'send' ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -57,7 +58,7 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
 
           <button
             onClick={() => setActiveTab('receive')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1 transition-all ${
               activeTab === 'receive' ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -67,27 +68,66 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
 
           <button
             onClick={() => setActiveTab('compressor')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1 transition-all ${
               activeTab === 'compressor' ? 'bg-emerald-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>{t('compress')}</span>
+            <span>Compressor</span>
           </button>
+
+          {/* Tools Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsToolsOpen(!isToolsOpen)}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center space-x-1 transition-all"
+            >
+              <span>More Tools</span>
+              <ChevronDown className="w-3 h-3 text-slate-400" />
+            </button>
+
+            {isToolsOpen && (
+              <div className="absolute left-0 mt-2 w-48 glass-panel rounded-2xl p-2 border border-slate-700 shadow-2xl z-50 space-y-1 text-left">
+                <button
+                  onClick={() => { setActiveTab('audio-extractor'); setIsToolsOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center space-x-2"
+                >
+                  <Music className="w-4 h-4 text-purple-400" />
+                  <span>Audio Extractor</span>
+                </button>
+
+                <button
+                  onClick={() => { setActiveTab('image-optimizer'); setIsToolsOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center space-x-2"
+                >
+                  <Image className="w-4 h-4 text-emerald-400" />
+                  <span>Image Optimizer</span>
+                </button>
+
+                <button
+                  onClick={() => { setActiveTab('speed-test'); setIsToolsOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center space-x-2"
+                >
+                  <Zap className="w-4 h-4 text-cyan-400" />
+                  <span>Speed Test</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           <button
             onClick={() => setActiveTab('history')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1 transition-all ${
               activeTab === 'history' ? 'bg-slate-800 text-purple-300 shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            <span>{t('history')}</span>
+            <span>History</span>
           </button>
 
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1 transition-all ${
               activeTab === 'reviews' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >

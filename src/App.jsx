@@ -4,6 +4,9 @@ import { HomePage } from './components/HomePage';
 import { SendPage } from './components/SendPage';
 import { ReceivePage } from './components/ReceivePage';
 import { VideoCompressor } from './components/VideoCompressor';
+import { AudioExtractor } from './components/AudioExtractor';
+import { ImageOptimizer } from './components/ImageOptimizer';
+import { SpeedTestTool } from './components/SpeedTestTool';
 import { TransferHistory } from './components/TransferHistory';
 import { UserReviews } from './components/UserReviews';
 import { PermissionsModal } from './components/PermissionsModal';
@@ -88,6 +91,18 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'audio-extractor' && (
+            <AudioExtractor onBackHome={() => setActiveTab('home')} />
+          )}
+
+          {activeTab === 'image-optimizer' && (
+            <ImageOptimizer onBackHome={() => setActiveTab('home')} />
+          )}
+
+          {activeTab === 'speed-test' && (
+            <SpeedTestTool onBackHome={() => setActiveTab('home')} />
+          )}
+
           {activeTab === 'history' && (
             <TransferHistory
               history={history}
@@ -111,7 +126,7 @@ export default function App() {
               </div>
               <div>
                 <div className="font-bold text-white text-sm">VICTORSHARE ADVANCED V1.0</div>
-                <p className="text-[11px] text-slate-400">Universal P2P File & Video Transfer Engine (10MB to 10TB+)</p>
+                <p className="text-[11px] text-slate-400 font-mono">Universal P2P File & Video Transfer Engine (10MB to 10TB+)</p>
               </div>
             </div>
 
