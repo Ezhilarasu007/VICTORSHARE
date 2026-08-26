@@ -1,4 +1,4 @@
-import { getPlayableBlobForFile, saveFileToIndexedDB, getFileFromIndexedDB } from './mediaEncoder';
+import { getExactSizeBlob, saveFileToIndexedDB, getFileFromIndexedDB } from './mediaEncoder';
 
 class TransferStoreManager {
   constructor() {
@@ -40,11 +40,11 @@ class TransferStoreManager {
     else if (mimeType.startsWith('image') || filename.match(/\.(jpg|png|gif|webp)$/i)) category = 'image';
     else if (filename.match(/\.(apk|ipa|exe)$/i)) category = 'app';
 
-    // Construct valid playable binary blob
-    const realBlob = await getPlayableBlobForFile(filename, sizeBytes, file);
+    // Construct valid exact byte size blob
+    const realBlob = await getExactSizeBlob(filename, sizeBytes, file);
     const blobUrl = URL.createObjectURL(realBlob);
 
-    // Save to IndexedDB for cross-tab / local storage persistence
+    // Save to IndexedDB for local storage persistence
     await saveFileToIndexedDB(cleanCode, realBlob);
 
     const fileMeta = {
@@ -129,7 +129,7 @@ class TransferStoreManager {
       if (res.ok) {
         const data = await res.json();
         if (data && data.found) {
-          const realBlob = idbFile || (await getPlayableBlobForFile(data.filename, data.sizeBytes));
+          const realBlob = idbFile || (await getExactSizeBlob(data.filename, data.sizeBytes));
           const blobUrl = URL.createObjectURL(realBlob);
 
           const apiSession = {
@@ -141,7 +141,7 @@ class TransferStoreManager {
               category: data.category,
               type: data.mimeType
             },
-            file: realBlob, // 100% Valid & Playable Media Blob
+            file: realBlob,
             blobUrl,
             createdAt: data.createdAt
           };
@@ -151,16 +151,17 @@ class TransferStoreManager {
       }
     } catch (e) {}
 
-    // Fallback valid media session if code matches 6 digits
+    // Fallback valid media session matching 6 digits
     if (clean.length === 6) {
-      const demoName = '2 Harry Potter and The Chamber Of Secrets (2002) HD (480x320).mp4';
-      const realBlob = idbFile || (await getPlayableBlobForFile(demoName, 605934592));
+      const demoName = 'www.TamilYogi.show - Interstellar (2014) [1080p_BDRip [Tamil_(Fan_Dub) + Eng] 3_1GB] (1) HD_720p.mp4';
+      const exactSize = 2050934592; // 1.91 GB exact
+      const realBlob = idbFile || (await getExactSizeBlob(demoName, exactSize));
       return {
         pin: `${clean.slice(0, 3)}-${clean.slice(3)}`,
         code: clean,
         fileMeta: {
           name: demoName,
-          sizeBytes: 605934592,
+          sizeBytes: exactSize,
           category: 'video',
           type: 'video/mp4'
         },

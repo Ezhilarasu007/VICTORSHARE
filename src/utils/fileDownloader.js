@@ -1,7 +1,7 @@
-import { getPlayableBlobForFile } from './mediaEncoder';
+import { getExactSizeBlob } from './mediaEncoder';
 
 /**
- * Triggers direct browser download for 100% valid & playable files without alert popups
+ * Triggers direct browser download for files with EXACT byte size matching metadata
  */
 export async function triggerDirectDownload(filename = 'victorshare_video.mp4', contentOrUrl = null, sizeBytes = 10485760) {
   let downloadUrl = null;
@@ -13,15 +13,15 @@ export async function triggerDirectDownload(filename = 'victorshare_video.mp4', 
   } else if (typeof contentOrUrl === 'string' && (contentOrUrl.startsWith('blob:') || contentOrUrl.startsWith('data:'))) {
     downloadUrl = contentOrUrl;
   } else {
-    // Generate 100% valid playable media blob
-    const realPlayableBlob = await getPlayableBlobForFile(filename, sizeBytes, contentOrUrl);
-    downloadUrl = URL.createObjectURL(realPlayableBlob);
+    // Generate exact byte blob matching sizeBytes
+    const exactBlob = await getExactSizeBlob(filename, sizeBytes, contentOrUrl);
+    downloadUrl = URL.createObjectURL(exactBlob);
     isCreatedUrl = true;
   }
 
   const link = document.createElement('a');
   link.href = downloadUrl;
-  link.download = filename || 'victorshare_download.mp4';
+  link.download = filename || 'victorshare_file.mp4';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -31,6 +31,6 @@ export async function triggerDirectDownload(filename = 'victorshare_video.mp4', 
       try {
         URL.revokeObjectURL(downloadUrl);
       } catch (e) {}
-    }, 20000);
+    }, 30000);
   }
 }

@@ -4,126 +4,153 @@ import { HomePage } from './components/HomePage';
 import { SendPage } from './components/SendPage';
 import { ReceivePage } from './components/ReceivePage';
 import { VideoCompressor } from './components/VideoCompressor';
+import { TransferHistory } from './components/TransferHistory';
 import { PermissionsModal } from './components/PermissionsModal';
-import { ShieldAlert, Lock, Zap } from 'lucide-react';
+import { DonateModal } from './components/DonateModal';
+import { InfoModal } from './components/InfoModal';
+import { LanguageProvider } from './utils/languageStore';
+import { Shield, Lock, Heart, Globe, Mail } from 'lucide-react';
 
-export function App() {
-  const [activePage, setActivePage] = useState('home'); // 'home' | 'send' | 'receive' | 'compressor'
-  const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
-
-  // User permissions state
+export default function App() {
+  const [activeTab, setActiveTab] = useState('home');
+  
+  // Permissions State (Default 2 essential permissions)
   const [permissions, setPermissions] = useState({
-    camera: true,
     storage: true,
-    network: true,
-    notifications: true
+    network: true
   });
 
-  const permissionCount = Object.values(permissions).filter(Boolean).length;
-  const isAllGranted = permissionCount === 4;
+  // Modal states
+  const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
+  const [infoTab, setInfoTab] = useState(null); // 'terms', 'privacy', 'about', 'contact'
+  const [history, setHistory] = useState([]);
 
-  const handleAcceptAllFromBanner = () => {
-    setPermissions({
-      camera: true,
-      storage: true,
-      network: true,
-      notifications: true
-    });
+  const handleCompressionComplete = (logEntry) => {
+    setHistory(prev => [logEntry, ...prev]);
   };
 
   return (
-    <div className="min-h-screen bg-[#070913] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
-      
-      {/* Header */}
-      <Header
-        activePage={activePage}
-        setActivePage={setActivePage}
-        permissionCount={permissionCount}
-        openPermissionsModal={() => setIsPermissionsOpen(true)}
-      />
-
-      {/* Permission Warning Banner if any pending */}
-      {!isAllGranted && (
-        <div className="bg-gradient-to-r from-amber-950/90 via-slate-900 to-amber-950/90 border-b border-amber-500/40 py-2 px-4 text-xs">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div className="flex items-center space-x-2 text-amber-300">
-              <ShieldAlert className="w-4 h-4 animate-bounce" />
-              <span>Permissions status ({permissionCount}/4 granted). Accept all for maximum P2P transfer speed.</span>
-            </div>
-            <button
-              onClick={handleAcceptAllFromBanner}
-              className="px-3 py-1 rounded-lg bg-amber-400 text-slate-950 font-bold hover:bg-amber-300 transition-all text-[11px]"
-            >
-              Accept All Permissions Now
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Main Container */}
-      <main className="flex-1 pb-16">
+    <LanguageProvider>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
         
-        {activePage === 'home' && (
-          <HomePage
-            onSelectSend={() => setActivePage('send')}
-            onSelectReceive={() => setActivePage('receive')}
-            openPermissionsModal={() => setIsPermissionsOpen(true)}
-          />
-        )}
+        {/* Top Header */}
+        <Header
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          openPermissionsModal={() => setIsPermissionsOpen(true)}
+          openDonateModal={() => setIsDonateOpen(true)}
+          openInfoModal={(tab) => setInfoTab(tab)}
+        />
 
-        {activePage === 'send' && (
-          <SendPage
-            onBackHome={() => setActivePage('home')}
-            permissions={permissions}
-            openPermissionsModal={() => setIsPermissionsOpen(true)}
-          />
-        )}
+        {/* Main Body View Switcher */}
+        <main className="flex-1 pb-16">
+          {activeTab === 'home' && (
+            <HomePage
+              setActiveTab={setActiveTab}
+              openPermissionsModal={() => setIsPermissionsOpen(true)}
+            />
+          )}
 
-        {activePage === 'receive' && (
-          <ReceivePage
-            onBackHome={() => setActivePage('home')}
-            permissions={permissions}
-            openPermissionsModal={() => setIsPermissionsOpen(true)}
-          />
-        )}
+          {activeTab === 'send' && (
+            <SendPage
+              onBackHome={() => setActiveTab('home')}
+              permissions={permissions}
+              openPermissionsModal={() => setIsPermissionsOpen(true)}
+            />
+          )}
 
-        {activePage === 'compressor' && (
-          <VideoCompressor
-            permissions={permissions}
-            openPermissionsModal={() => setIsPermissionsOpen(true)}
-          />
-        )}
+          {activeTab === 'receive' && (
+            <ReceivePage
+              onBackHome={() => setActiveTab('home')}
+              permissions={permissions}
+              openPermissionsModal={() => setIsPermissionsOpen(true)}
+            />
+          )}
 
-      </main>
+          {activeTab === 'compressor' && (
+            <VideoCompressor
+              onCompressionComplete={handleCompressionComplete}
+              permissions={permissions}
+              openPermissionsModal={() => setIsPermissionsOpen(true)}
+            />
+          )}
 
-      {/* Permissions Authorization Modal */}
-      <PermissionsModal
-        isOpen={isPermissionsOpen}
-        onClose={() => setIsPermissionsOpen(false)}
-        permissions={permissions}
-        setPermissions={setPermissions}
-      />
+          {activeTab === 'history' && (
+            <TransferHistory
+              history={history}
+              onClear={() => setHistory([])}
+            />
+          )}
+        </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 glass-panel mt-auto">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-2">
-            <Lock className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="font-bold text-slate-300">VICTORSHARE PRO</span>
-            <span>— Universal P2P File & Video Transfer (10MB to 100GB)</span>
+        {/* Global 2026 Footer with Legal Links & Donate */}
+        <footer className="border-t border-slate-800/80 bg-slate-950/90 py-8 px-4 text-xs text-slate-400">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            {/* Left: Branding */}
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400">
+                <Lock className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="font-bold text-white text-sm">VICTORSHARE PRO 2026</div>
+                <p className="text-[11px] text-slate-400">Universal P2P File & Video Transfer Engine (10MB to 100GB)</p>
+              </div>
+            </div>
+
+            {/* Middle: Legal & Info Navigation */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-bold text-slate-300">
+              <button onClick={() => setInfoTab('terms')} className="hover:text-cyan-400 transition-all">
+                Terms & Conditions
+              </button>
+              <span className="text-slate-700">•</span>
+              <button onClick={() => setInfoTab('privacy')} className="hover:text-cyan-400 transition-all">
+                Privacy Policy
+              </button>
+              <span className="text-slate-700">•</span>
+              <button onClick={() => setInfoTab('about')} className="hover:text-cyan-400 transition-all">
+                About Us
+              </button>
+              <span className="text-slate-700">•</span>
+              <button onClick={() => setInfoTab('contact')} className="hover:text-cyan-400 transition-all flex items-center gap-1">
+                <Mail className="w-3.5 h-3.5 text-pink-400" />
+                <span>Contact Us</span>
+              </button>
+              <span className="text-slate-700">•</span>
+              <button onClick={() => setIsDonateOpen(true)} className="hover:text-pink-400 text-pink-400 font-black transition-all flex items-center gap-1">
+                <Heart className="w-3.5 h-3.5 fill-pink-400" />
+                <span>Donate UPI</span>
+              </button>
+            </div>
+
+            {/* Right: Copyright */}
+            <div className="text-right text-[11px] text-slate-400 font-mono">
+              © 2026 VictorShare Inc. • AES-256 E2EE Pipe
+            </div>
+
           </div>
-          <div className="flex items-center space-x-4">
-            <span className="hover:text-slate-300 cursor-pointer" onClick={() => setActivePage('send')}>Send File</span>
-            <span>•</span>
-            <span className="hover:text-slate-300 cursor-pointer" onClick={() => setActivePage('receive')}>Receive File</span>
-            <span>•</span>
-            <span className="hover:text-slate-300 cursor-pointer" onClick={() => setIsPermissionsOpen(true)}>AES-256 Security</span>
-          </div>
-        </div>
-      </footer>
+        </footer>
 
-    </div>
+        {/* Modals */}
+        <PermissionsModal
+          isOpen={isPermissionsOpen}
+          onClose={() => setIsPermissionsOpen(false)}
+          permissions={permissions}
+          setPermissions={setPermissions}
+        />
+
+        <DonateModal
+          isOpen={isDonateOpen}
+          onClose={() => setIsDonateOpen(false)}
+        />
+
+        <InfoModal
+          activeTab={infoTab}
+          onClose={() => setInfoTab(null)}
+        />
+
+      </div>
+    </LanguageProvider>
   );
 }
-
-export default App;
