@@ -1,7 +1,7 @@
 import React from 'react';
-import { Send, Download, ShieldCheck, Zap, Smartphone, HardDrive, Lock, ArrowRight, Sparkles, Globe, Wifi } from 'lucide-react';
+import { Send, Download, ShieldCheck, Zap, Smartphone, HardDrive, Lock, ArrowRight, Sparkles, Globe, Wifi, Film, Package, FileText, Image } from 'lucide-react';
 
-export function HomePage({ onSelectSend, onSelectReceive, onSelectCompressor, openPermissionsModal }) {
+export function HomePage({ onSelectSend, onSelectReceive, openPermissionsModal }) {
   return (
     <div className="space-y-12 max-w-6xl mx-auto px-4 py-8">
       
@@ -9,15 +9,15 @@ export function HomePage({ onSelectSend, onSelectReceive, onSelectCompressor, op
       <div className="text-center space-y-4 max-w-3xl mx-auto">
         <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-bold uppercase tracking-wider shadow-lg shadow-cyan-500/10">
           <Lock className="w-3.5 h-3.5 text-cyan-400" />
-          <span>100% Private • End-to-End Encrypted P2P Share</span>
+          <span>100% Private • End-to-End Encrypted Worldwide Share</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
-          Send & Receive Files up to <span className="text-gradient-cyan">100GB</span> Anywhere
+          Send & Receive Files or Videos up to <span className="text-gradient-cyan">100GB</span>
         </h1>
 
         <p className="text-base text-slate-300 leading-relaxed">
-          Ultra-fast, private file sharing between iOS, Android, and Desktop. Tap to Upload, share your 6-digit PIN code, and transfer instantly with zero cloud storage.
+          High-speed encrypted file sharing between friends or worldwide. Share Videos, Photos, Android APK Apps, PDFs, and Folders from 10MB up to 100GB.
         </p>
       </div>
 
@@ -37,16 +37,16 @@ export function HomePage({ onSelectSend, onSelectReceive, onSelectCompressor, op
                 <Send className="w-8 h-8 stroke-[2.5]" />
               </div>
               <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/80 px-3 py-1 rounded-full border border-cyan-800">
-                10MB - 100GB
+                10MB - 100GB Support
               </span>
             </div>
 
             <div>
               <h2 className="text-2xl font-black text-white group-hover:text-cyan-300 transition-colors">
-                SEND A FILE
+                SEND A FILE OR VIDEO
               </h2>
               <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-                Tap to upload any file (from 10MB to 100GB). Get an instant 6-digit PIN code or QR code to share securely.
+                Tap to upload any Video, Photo, APK App, PDF, or Folder. Automatically shows your secure transfer code — no personal code entry needed!
               </p>
             </div>
           </div>
@@ -55,7 +55,7 @@ export function HomePage({ onSelectSend, onSelectReceive, onSelectCompressor, op
             <span className="text-xs font-bold text-cyan-400 flex items-center gap-1">
               Tap to Upload File <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">Encrypted Stream</span>
+            <span className="text-[10px] text-slate-500 font-mono">AES-256 Encrypted</span>
           </div>
         </div>
 
@@ -72,85 +72,80 @@ export function HomePage({ onSelectSend, onSelectReceive, onSelectCompressor, op
                 <Download className="w-8 h-8 stroke-[2.5]" />
               </div>
               <span className="text-xs font-mono font-bold text-purple-300 bg-purple-950/80 px-3 py-1 rounded-full border border-purple-800">
-                Instant Download
+                Instant P2P Stream
               </span>
             </div>
 
             <div>
               <h2 className="text-2xl font-black text-white group-hover:text-purple-300 transition-colors">
-                RECEIVE A FILE
+                RECEIVE A FILE OR VIDEO
               </h2>
               <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-                Tap to enter the sender's 6-digit PIN code or scan QR code. Connect instantly and download at maximum Wi-Fi speed.
+                Tap to enter the 6-digit Transfer Code. Inspect file details and download directly at maximum Wi-Fi / P2P speed.
               </p>
             </div>
           </div>
 
           <div className="pt-6 flex items-center justify-between border-t border-slate-800">
             <span className="text-xs font-bold text-purple-300 flex items-center gap-1">
-              Tap to Enter PIN <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Tap to Enter Code <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">No Login Required</span>
+            <span className="text-[10px] text-slate-500 font-mono">No Server Account Required</span>
           </div>
         </div>
 
       </div>
 
-      {/* Secondary Banner: Video Compressor Shortcut */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-500/20 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center space-x-4">
-          <div className="p-3.5 bg-cyan-950/80 border border-cyan-500/40 rounded-2xl text-cyan-400">
-            <HardDrive className="w-8 h-8" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              100GB to 10MB Video Compressor Engine
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-cyan-400 text-slate-950 rounded">Ultra Ratio</span>
-            </h3>
-            <p className="text-xs text-slate-300 mt-1">
-              Need to share large 100GB videos over WhatsApp or AirDrop? Downscale and transcode directly in your browser.
-            </p>
-          </div>
+      {/* Supported File Types Bar */}
+      <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-wrap items-center justify-around gap-4 text-center">
+        <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
+          <Film className="w-5 h-5 text-cyan-400" />
+          <span>4K/8K Videos (10MB - 100GB)</span>
         </div>
-
-        <button
-          onClick={onSelectCompressor}
-          className="w-full md:w-auto px-6 py-3 rounded-xl btn-gradient-primary text-xs font-bold whitespace-nowrap shadow-lg shadow-cyan-500/20"
-        >
-          Open Video Compressor
-        </button>
+        <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
+          <Image className="w-5 h-5 text-purple-400" />
+          <span>Photos & RAW Galleries</span>
+        </div>
+        <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
+          <Package className="w-5 h-5 text-emerald-400" />
+          <span>Android APK Apps</span>
+        </div>
+        <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
+          <FileText className="w-5 h-5 text-pink-400" />
+          <span>PDFs & Documents</span>
+        </div>
       </div>
 
       {/* Security & Feature Badges Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
         
         <div className="glass-card p-5 rounded-2xl space-y-2 border border-slate-800">
           <div className="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
             <Lock className="w-4 h-4" />
-            <span>100% Private & Secure</span>
+            <span>100% Private & Anonymous</span>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Files stream directly between peer devices over WebRTC. Nothing is ever saved on external servers.
+            Direct WebRTC stream. Files pass securely between devices without storing personal data on servers.
           </p>
         </div>
 
         <div className="glass-card p-5 rounded-2xl space-y-2 border border-slate-800">
           <div className="flex items-center space-x-2 text-purple-400 font-bold text-sm">
             <Smartphone className="w-4 h-4" />
-            <span>iOS, Android & PC</span>
+            <span>iOS, Android & Desktop</span>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Works smoothly on iPhone Safari, Android Chrome, Mac, Windows, and Linux browsers without installing apps.
+            Compatible with iPhone Safari, Android Chrome, Mac, Windows, and Linux browsers worldwide.
           </p>
         </div>
 
         <div className="glass-card p-5 rounded-2xl space-y-2 border border-slate-800">
           <div className="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
             <Zap className="w-4 h-4" />
-            <span>50+ MB/s Fast Transfer</span>
+            <span>Fast P2P Transfer</span>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Direct local network throughput with chunked verification ensures zero file corruption.
+            High-speed chunked stream pipeline with SHA-256 verification guarantees 100% accurate downloads.
           </p>
         </div>
 

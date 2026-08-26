@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, ShieldCheck, Wifi, Smartphone, Send, Download, HardDrive, Home, ArrowUpRight } from 'lucide-react';
+import { Zap, ShieldCheck, Wifi, Smartphone, Send, Download, Lock, Home, Globe } from 'lucide-react';
 
 export function Header({ activePage, setActivePage, permissionCount, openPermissionsModal }) {
   const allGranted = permissionCount === 4;
@@ -19,14 +19,14 @@ export function Header({ activePage, setActivePage, permissionCount, openPermiss
               <div className="flex items-center space-x-2">
                 <span className="text-xl font-extrabold tracking-tight text-white">VICTOR<span className="text-gradient-cyan">SHARE</span></span>
                 <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 rounded-md">
-                  100GB P2P
+                  P2P WORLDWIDE
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium hidden sm:block">Private & Fast File Sharing for iOS, Android & PC</p>
+              <p className="text-[11px] text-slate-400 font-medium hidden sm:block">Universal File & Video Transfer for iOS, Android & PC (10MB to 100GB)</p>
             </div>
           </div>
 
-          {/* Page Nav Buttons */}
+          {/* Nav Buttons */}
           <div className="flex items-center space-x-1.5 sm:space-x-2">
             
             <button
@@ -50,7 +50,7 @@ export function Header({ activePage, setActivePage, permissionCount, openPermiss
               }`}
             >
               <Send className="w-4 h-4" />
-              <span>Send</span>
+              <span>Send File</span>
             </button>
 
             <button
@@ -62,19 +62,7 @@ export function Header({ activePage, setActivePage, permissionCount, openPermiss
               }`}
             >
               <Download className="w-4 h-4" />
-              <span>Receive</span>
-            </button>
-
-            <button
-              onClick={() => setActivePage('compressor')}
-              className={`px-3.5 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-1.5 ${
-                activePage === 'compressor'
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-lg shadow-emerald-500/20'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
-              }`}
-            >
-              <HardDrive className="w-4 h-4" />
-              <span className="hidden md:inline">100GB $\to$ 10MB</span>
+              <span>Receive File</span>
             </button>
 
             {/* Permission Badge */}
@@ -88,7 +76,7 @@ export function Header({ activePage, setActivePage, permissionCount, openPermiss
               title="Permissions"
             >
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="hidden lg:inline">{allGranted ? 'Permissions OK' : `${permissionCount}/4`}</span>
+              <span className="hidden lg:inline">{allGranted ? 'Encrypted Channel' : `${permissionCount}/4`}</span>
             </button>
 
           </div>

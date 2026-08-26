@@ -4,12 +4,11 @@ import { HomePage } from './components/HomePage';
 import { SendPage } from './components/SendPage';
 import { ReceivePage } from './components/ReceivePage';
 import { VideoCompressor } from './components/VideoCompressor';
-import { TransferHistory } from './components/TransferHistory';
 import { PermissionsModal } from './components/PermissionsModal';
-import { ShieldAlert, CheckCircle2, Lock, Zap } from 'lucide-react';
+import { ShieldAlert, Lock, Zap } from 'lucide-react';
 
 export function App() {
-  const [activePage, setActivePage] = useState('home'); // 'home' | 'send' | 'receive' | 'compressor' | 'history'
+  const [activePage, setActivePage] = useState('home'); // 'home' | 'send' | 'receive' | 'compressor'
   const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
 
   // User permissions state
@@ -19,8 +18,6 @@ export function App() {
     network: true,
     notifications: true
   });
-
-  const [historyLogs, setHistoryLogs] = useState([]);
 
   const permissionCount = Object.values(permissions).filter(Boolean).length;
   const isAllGranted = permissionCount === 4;
@@ -51,7 +48,7 @@ export function App() {
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <div className="flex items-center space-x-2 text-amber-300">
               <ShieldAlert className="w-4 h-4 animate-bounce" />
-              <span>Permissions status ({permissionCount}/4 granted). Accept all for full P2P performance.</span>
+              <span>Permissions status ({permissionCount}/4 granted). Accept all for maximum P2P transfer speed.</span>
             </div>
             <button
               onClick={handleAcceptAllFromBanner}
@@ -63,14 +60,13 @@ export function App() {
         </div>
       )}
 
-      {/* Main Pages Navigation */}
+      {/* Main Container */}
       <main className="flex-1 pb-16">
         
         {activePage === 'home' && (
           <HomePage
             onSelectSend={() => setActivePage('send')}
             onSelectReceive={() => setActivePage('receive')}
-            onSelectCompressor={() => setActivePage('compressor')}
             openPermissionsModal={() => setIsPermissionsOpen(true)}
           />
         )}
@@ -93,30 +89,8 @@ export function App() {
 
         {activePage === 'compressor' && (
           <VideoCompressor
-            onCompressionComplete={(res) => {
-              setHistoryLogs(prev => [
-                {
-                  id: Date.now(),
-                  filename: res.filename,
-                  originalSizeBytes: res.originalSizeBytes,
-                  compressedSizeBytes: res.compressedSizeBytes,
-                  reductionPercent: `${res.reductionPercent}%`,
-                  targetSizeMB: res.targetSizeMB,
-                  timestamp: 'Just now',
-                  status: 'Compressed to 10MB - Ready to Share'
-                },
-                ...prev
-              ]);
-            }}
             permissions={permissions}
             openPermissionsModal={() => setIsPermissionsOpen(true)}
-          />
-        )}
-
-        {activePage === 'history' && (
-          <TransferHistory
-            history={historyLogs}
-            onClear={() => setHistoryLogs([])}
           />
         )}
 
@@ -136,14 +110,14 @@ export function App() {
           <div className="flex items-center space-x-2">
             <Lock className="w-3.5 h-3.5 text-cyan-400" />
             <span className="font-bold text-slate-300">VICTORSHARE PRO</span>
-            <span>— 100% Private P2P File Transfer (10MB to 100GB)</span>
+            <span>— Universal P2P File & Video Transfer (10MB to 100GB)</span>
           </div>
           <div className="flex items-center space-x-4">
             <span className="hover:text-slate-300 cursor-pointer" onClick={() => setActivePage('send')}>Send File</span>
             <span>•</span>
             <span className="hover:text-slate-300 cursor-pointer" onClick={() => setActivePage('receive')}>Receive File</span>
             <span>•</span>
-            <span className="hover:text-slate-300 cursor-pointer" onClick={() => setActivePage('compressor')}>Video Transcoder</span>
+            <span className="hover:text-slate-300 cursor-pointer" onClick={() => setIsPermissionsOpen(true)}>AES-256 Security</span>
           </div>
         </div>
       </footer>
