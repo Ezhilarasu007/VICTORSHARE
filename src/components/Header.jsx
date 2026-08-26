@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, ChevronDown } from 'lucide-react';
+import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../utils/languageStore';
 
-export function Header({ activeTab, setActiveTab, openPermissionsModal, openDonateModal }) {
+export function Header({ activeTab, setActiveTab, openPermissionsModal, openDonateModal, openGuideModal }) {
   const { lang, setLang, t, LANGUAGES } = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
 
@@ -25,7 +25,7 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
               <span className="text-xl font-black tracking-tight text-white">VICTOR</span>
               <span className="text-xl font-black tracking-tight text-gradient-cyan">SHARE</span>
               <span className="text-[10px] uppercase font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40">
-                PRO 2026
+                ADVANCED V1.0 (10TB)
               </span>
             </div>
             <p className="text-[10px] text-slate-400 font-mono hidden sm:block">
@@ -99,6 +99,16 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
         {/* Right Actions */}
         <div className="flex items-center space-x-2 sm:space-x-3">
           
+          {/* How to Use Guide Button */}
+          <button
+            onClick={openGuideModal}
+            className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 text-xs font-bold flex items-center space-x-1.5 transition-all"
+            title="How to Use Guide"
+          >
+            <HelpCircle className="w-4 h-4 text-cyan-400" />
+            <span className="hidden sm:inline">Guide</span>
+          </button>
+
           {/* Donate / Support Button */}
           <button
             onClick={openDonateModal}

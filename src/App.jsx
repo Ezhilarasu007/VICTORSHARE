@@ -9,8 +9,9 @@ import { UserReviews } from './components/UserReviews';
 import { PermissionsModal } from './components/PermissionsModal';
 import { DonateModal } from './components/DonateModal';
 import { InfoModal } from './components/InfoModal';
+import { GuideModal } from './components/GuideModal';
 import { LanguageProvider } from './utils/languageStore';
-import { Shield, Lock, Heart, Globe, Mail, Star } from 'lucide-react';
+import { Shield, Lock, Heart, Globe, Mail, Star, HelpCircle } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -24,6 +25,7 @@ export default function App() {
   // Modal states
   const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
   const [isDonateOpen, setIsDonateOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [infoTab, setInfoTab] = useState(null); // 'terms', 'privacy', 'about', 'contact'
   const [history, setHistory] = useState([]);
 
@@ -50,6 +52,7 @@ export default function App() {
           setActiveTab={setActiveTab}
           openPermissionsModal={() => setIsPermissionsOpen(true)}
           openDonateModal={() => setIsDonateOpen(true)}
+          openGuideModal={() => setIsGuideOpen(true)}
         />
 
         {/* Main Body View Switcher */}
@@ -97,7 +100,7 @@ export default function App() {
           )}
         </main>
 
-        {/* Global 2026 Footer with Legal Links & Donate */}
+        {/* Global 2026 Footer with Legal Links & Guide */}
         <footer className="border-t border-slate-800/80 bg-slate-950/90 py-8 px-4 text-xs text-slate-400">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             
@@ -107,13 +110,18 @@ export default function App() {
                 <Lock className="w-4 h-4" />
               </div>
               <div>
-                <div className="font-bold text-white text-sm">VICTORSHARE PRO 2026</div>
-                <p className="text-[11px] text-slate-400">Universal P2P File & Video Transfer Engine (10MB to 100GB)</p>
+                <div className="font-bold text-white text-sm">VICTORSHARE ADVANCED V1.0</div>
+                <p className="text-[11px] text-slate-400">Universal P2P File & Video Transfer Engine (10MB to 10TB+)</p>
               </div>
             </div>
 
             {/* Middle: Legal & Info Navigation */}
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-bold text-slate-300">
+              <button onClick={() => setIsGuideOpen(true)} className="hover:text-cyan-400 font-bold transition-all flex items-center gap-1">
+                <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
+                <span>How to Use Guide</span>
+              </button>
+              <span className="text-slate-700">•</span>
               <button onClick={() => setInfoTab('terms')} className="hover:text-cyan-400 transition-all">
                 Terms & Conditions
               </button>
@@ -166,6 +174,11 @@ export default function App() {
         <InfoModal
           activeTab={infoTab}
           onClose={() => setInfoTab(null)}
+        />
+
+        <GuideModal
+          isOpen={isGuideOpen}
+          onClose={() => setIsGuideOpen(false)}
         />
 
       </div>
