@@ -9,8 +9,27 @@
     <meta name="google-site-verification" content="ypu3sizgkuif" />
     <meta name="google-site-verification" content="gv-bvbsqsf2pzrap2.dv.googlehosted.com" />
     
-    <title>VictorShare — Universal P2P File & Video Transfer (10MB to 100GB)</title>
-    <meta name="description" content="Send & receive files up to 100GB instantly between iOS, Android, Windows & Mac with 100% End-to-End Encryption." />
+    <title>VictorShare — Universal P2P File & Video Transfer (10MB to 10TB+)</title>
+    <meta name="description" content="Send & receive files up to 10TB+ instantly between iOS, Android, Windows & Mac with 100% End-to-End Encryption." />
+
+    <!-- Firebase JS SDK CDN -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAThrwMYJ8xq7SqJgzOM30m5S9HkwHwGEs",
+        authDomain: "victorshare.firebaseapp.com",
+        projectId: "victorshare",
+        storageBucket: "victorshare.firebasestorage.app",
+        messagingSenderId: "267109953634",
+        appId: "1:267109953634:web:5ce1efd7bc5d0d0081213b",
+        measurementId: "G-8N2192DVQ2"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+    </script>
 
     <!-- Google AdSense Script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6751037211810646" crossorigin="anonymous"></script>
