@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown, Music, Image, Zap } from 'lucide-react';
+import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown, Music, Image, Zap, Lock } from 'lucide-react';
 import { useLanguage } from '../utils/languageStore';
 
 export function Header({ activeTab, setActiveTab, openPermissionsModal, openDonateModal, openGuideModal }) {
@@ -139,6 +139,18 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
         {/* Right Actions */}
         <div className="flex items-center space-x-2 sm:space-x-3">
           
+          {/* Admin Login Button */}
+          <button
+            onClick={() => setActiveTab('admin')}
+            className={`px-2.5 py-2 rounded-xl border text-xs font-bold flex items-center space-x-1 transition-all ${
+              activeTab === 'admin' ? 'bg-rose-950 border-rose-500 text-rose-300' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+            }`}
+            title="Secret Admin Portal"
+          >
+            <Lock className="w-4 h-4 text-rose-400" />
+            <span className="hidden sm:inline">Admin</span>
+          </button>
+
           {/* How to Use Guide Button */}
           <button
             onClick={openGuideModal}

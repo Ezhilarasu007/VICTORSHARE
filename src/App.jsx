@@ -7,6 +7,7 @@ import { VideoCompressor } from './components/VideoCompressor';
 import { AudioExtractor } from './components/AudioExtractor';
 import { ImageOptimizer } from './components/ImageOptimizer';
 import { SpeedTestTool } from './components/SpeedTestTool';
+import { AdminDashboard } from './components/AdminDashboard';
 import { TransferHistory } from './components/TransferHistory';
 import { UserReviews } from './components/UserReviews';
 import { PermissionsModal } from './components/PermissionsModal';
@@ -14,7 +15,7 @@ import { DonateModal } from './components/DonateModal';
 import { InfoModal } from './components/InfoModal';
 import { GuideModal } from './components/GuideModal';
 import { LanguageProvider } from './utils/languageStore';
-import { Shield, Lock, Heart, Globe, Mail, Star, HelpCircle } from 'lucide-react';
+import { Shield, Lock, Heart, Globe, Mail, Star, HelpCircle, AlertCircle } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -103,6 +104,10 @@ export default function App() {
             <SpeedTestTool onBackHome={() => setActiveTab('home')} />
           )}
 
+          {activeTab === 'admin' && (
+            <AdminDashboard onBackHome={() => setActiveTab('home')} />
+          )}
+
           {activeTab === 'history' && (
             <TransferHistory
               history={history}
@@ -119,13 +124,16 @@ export default function App() {
         <footer className="border-t border-slate-800/80 bg-slate-950/90 py-8 px-4 text-xs text-slate-400">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             
-            {/* Left: Branding */}
+            {/* Left: Branding & 18+ Age Restriction */}
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400">
                 <Lock className="w-4 h-4" />
               </div>
               <div>
-                <div className="font-bold text-white text-sm">VICTORSHARE ADVANCED V1.0</div>
+                <div className="font-bold text-white text-sm flex items-center gap-1.5">
+                  <span>VICTORSHARE ADVANCED V1.0</span>
+                  <span className="px-1.5 py-0.5 text-[9px] rounded bg-amber-950 text-amber-300 border border-amber-500/40">18+ RESTRICTED</span>
+                </div>
                 <p className="text-[11px] text-slate-400 font-mono">Universal P2P File & Video Transfer Engine (10MB to 10TB+)</p>
               </div>
             </div>
