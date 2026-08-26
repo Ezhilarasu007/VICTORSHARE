@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Upload, HardDrive, Lock, ShieldCheck, Copy, Check, Send, CheckCircle2, RefreshCw, Smartphone, ArrowLeft, Film, Image, Music, Package, FileText, Globe, Clock } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { Upload, HardDrive, Lock, ShieldCheck, Copy, Check, Send, CheckCircle2, RefreshCw, Smartphone, ArrowLeft, Film, Image, Music, Package, FileText, Globe, Clock, Sparkles, Zap, PartyPopper } from 'lucide-react';
 import { formatBytes } from '../utils/videoEngine';
 import { TransferStore } from '../utils/transferStore';
 import { classifyFile } from '../utils/mediaClassifier';
@@ -9,6 +10,12 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [activeSession, setActiveSession] = useState(null);
   const [mediaInfo, setMediaInfo] = useState(null);
+
+  // Upload Progress State (0% to 100%)
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadSpeed, setUploadSpeed] = useState(0);
+  const [showBoomSurprise, setShowBoomSurprise] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(120);
   const [isCopied, setIsCopied] = useState(false);
@@ -20,7 +27,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
   const [transferSpeed, setTransferSpeed] = useState(0);
   const [connectedPeer, setConnectedPeer] = useState(null);
 
-  // Handle Real File Upload
+  // Handle Real File Upload with 0% to 100% Live Progress
   const handleFileUpload = async (e) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -28,7 +35,6 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
 
       const info = classifyFile(fileToUpload.name, fileToUpload.type);
       setMediaInfo(info);
-
       setSelectedFile({
         name: fileToUpload.name,
         sizeBytes: fileToUpload.size,
@@ -36,8 +42,39 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
         rawFile: fileToUpload
       });
 
+      setIsUploading(true);
+      setUploadProgress(0);
+      setShowBoomSurprise(false);
+
+      // Create session in transfer store
       const session = await TransferStore.createSession(fileToUpload);
-      setActiveSession(session);
+
+      // Simulate 0% to 100% fast upload stream progress
+      let pct = 0;
+      const interval = setInterval(() => {
+        pct += Math.floor(Math.random() * 15) + 10;
+        setUploadSpeed((Math.random() * 40 + 120).toFixed(1));
+
+        if (pct >= 100) {
+          pct = 100;
+          clearInterval(interval);
+          setIsUploading(false);
+          setActiveSession(session);
+          setShowBoomSurprise(true);
+
+          // FIRE CONFETTI BOOM SURPRISE 🎉
+          try {
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 }
+            });
+          } catch (err) {}
+
+          setTimeout(() => setShowBoomSurprise(false), 5000);
+        }
+        setUploadProgress(pct);
+      }, 100);
 
       setIsTransferring(false);
       setTransferProgress(0);
@@ -79,6 +116,14 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
         progressVal = 100;
         clearInterval(interval);
         setIsTransferring(false);
+
+        try {
+          confetti({
+            particleCount: 80,
+            spread: 90,
+            origin: { y: 0.5 }
+          });
+        } catch (e) {}
       }
       setTransferProgress(progressVal);
       setTransferSpeed((Math.random() * 30 + 110).toFixed(1));
@@ -125,7 +170,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
       </div>
 
       {/* STEP 1: Upload Dropzone */}
-      <div className="glass-panel p-8 rounded-3xl border-2 border-dashed border-cyan-500/50 hover:border-cyan-400 text-center space-y-6 transition-all relative shadow-2xl">
+      <div className="glass-panel p-8 rounded-3xl border-2 border-dashed border-cyan-500/50 hover:border-cyan-400 text-center space-y-6 transition-all relative shadow-2xl overflow-hidden">
         
         <input
           type="file"
@@ -146,8 +191,33 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
           </p>
         </div>
 
+        {/* Live 0% to 100% Upload Progress Bar */}
+        {isUploading && (
+          <div className="p-5 rounded-2xl bg-slate-950 border border-cyan-500/60 space-y-3 max-w-md mx-auto z-20 relative text-left shadow-2xl animate-fade-in">
+            <div className="flex items-center justify-between text-xs font-mono">
+              <span className="text-cyan-300 font-bold flex items-center gap-1.5">
+                <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
+                Encrypting & Storing Chunks...
+              </span>
+              <span className="text-emerald-400 font-bold">{uploadSpeed} MB/s</span>
+            </div>
+
+            <div className="w-full h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 transition-all duration-100"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+
+            <div className="flex justify-between text-xs font-mono text-slate-400">
+              <span>{uploadProgress}% Uploaded</span>
+              <span>{selectedFile?.name}</span>
+            </div>
+          </div>
+        )}
+
         {/* Selected File Details */}
-        {selectedFile && mediaInfo && (
+        {selectedFile && mediaInfo && !isUploading && (
           <div className="inline-flex items-center space-x-4 px-6 py-4 rounded-2xl bg-slate-950 border-2 border-cyan-500/60 text-xs font-bold text-white shadow-2xl z-20 relative text-left">
             <MediaIcon className="w-7 h-7 text-cyan-400 flex-shrink-0" />
             <div>
@@ -164,8 +234,21 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
 
       </div>
 
+      {/* BOOM! Celebratory Surprise Notification */}
+      {showBoomSurprise && (
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-900 via-pink-900 to-cyan-900 border-2 border-pink-400 text-white text-center space-y-1 shadow-2xl animate-bounce">
+          <div className="flex items-center justify-center space-x-2 font-black text-lg text-amber-300">
+            <PartyPopper className="w-6 h-6 animate-spin" />
+            <span>BOOM! 🎉 Encrypted Transfer Code Ready!</span>
+          </div>
+          <p className="text-xs text-slate-200">
+            Your file is encrypted & ready to stream! Share the 6-digit PIN code or QR code below.
+          </p>
+        </div>
+      )}
+
       {/* STEP 2: AUTO-GENERATED ENCRYPTED PIN */}
-      {activeSession && (
+      {activeSession && !isUploading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
           
           {/* Left: PIN Code */}

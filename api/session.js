@@ -1,19 +1,19 @@
-// Vercel Serverless API for VictorShare Global Session Database
+// Vercel Serverless API for VictorShare Global Session Database with Auto-Cleanup
 
-// In-memory global store across serverless warm instances
 const globalSessions = global.__VICTORSHARE_DB__ || new Map();
 global.__VICTORSHARE_DB__ = globalSessions;
 
 export default function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
+  // Create Session
   if (req.method === 'POST') {
     const { pin, code, filename, sizeBytes, category, mimeType } = req.body || {};
     if (!pin && !code) {
@@ -40,6 +40,7 @@ export default function handler(req, res) {
     return res.status(200).json({ status: 'ok', session: sessionData });
   }
 
+  // Query Session
   if (req.method === 'GET') {
     const { code, pin } = req.query || {};
     const queryCode = (code || pin || '').toString().replace('-', '').trim();
@@ -52,14 +53,14 @@ export default function handler(req, res) {
       return res.status(200).json(globalSessions.get(code || pin));
     }
 
-    // Default fallback matching demo code if not present
+    // Default fallback demo matching code
     if (queryCode === '325600') {
       return res.status(200).json({
         found: true,
         pin: '325-600',
         code: '325600',
         filename: 'www.1TamilMV.ing - Interstellar (2014) BluRay 1080p.mkv',
-        sizeBytes: 8053063680, // 7.5 GB exact
+        sizeBytes: 8053063680,
         category: 'video',
         mimeType: 'video/x-matroska',
         createdAt: Date.now()
@@ -67,6 +68,18 @@ export default function handler(req, res) {
     }
 
     return res.status(404).json({ found: false, message: 'Session not found for code: ' + queryCode });
+  }
+
+  // Auto-Delete Session Record from Server once download completes!
+  if (req.method === 'DELETE') {
+    const { code, pin } = req.query || {};
+    const queryCode = (code || pin || '').toString().replace('-', '').trim();
+
+    globalSessions.delete(queryCode);
+    globalSessions.delete(code);
+    globalSessions.delete(pin);
+
+    return res.status(200).json({ status: 'cleaned', message: 'Session auto-deleted from server storage.' });
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
