@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Wifi, Send, Download, Smartphone, Monitor, ShieldCheck, Camera, CheckCircle2, ArrowRight, RefreshCw, Copy, Check, Sparkles, HardDrive, Radio } from 'lucide-react';
 import { formatBytes } from '../utils/videoEngine';
+import { triggerDirectDownload } from '../utils/fileDownloader';
 
 export function P2PTransfer({ initialFile, permissions, openPermissionsModal }) {
   const [activeSubTab, setActiveSubTab] = useState('send'); // 'send' | 'receive'
@@ -82,7 +83,6 @@ export function P2PTransfer({ initialFile, permissions, openPermissionsModal }) 
   // Receive Flow simulation
   const handleConnectPin = () => {
     if (inputPin.replaceAll('-', '').length < 6) {
-      alert('Please enter a 6-digit pairing PIN');
       return;
     }
     
@@ -113,8 +113,6 @@ export function P2PTransfer({ initialFile, permissions, openPermissionsModal }) 
           text: 'Received via VictorShare P2P Network'
         });
       } catch (e) {}
-    } else {
-      alert('File ready for local download or AirDrop/Nearby Share');
     }
   };
 
@@ -378,7 +376,7 @@ export function P2PTransfer({ initialFile, permissions, openPermissionsModal }) 
 
                 <div className="grid grid-cols-2 gap-2 pt-2">
                   <button
-                    onClick={() => alert('Downloading file to local storage...')}
+                    onClick={() => triggerDirectDownload(receivedFile ? receivedFile.name : 'victorshare_download.mp4')}
                     className="py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2"
                   >
                     <Download className="w-4 h-4" />

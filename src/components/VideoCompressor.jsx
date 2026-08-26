@@ -176,8 +176,6 @@ export function VideoCompressor({ onCompressionComplete, permissions, openPermis
       } catch (err) {
         console.log('Share canceled', err);
       }
-    } else {
-      alert('Native sharing sheet open. Direct P2P transfer is also available in the Send & Receive tab!');
     }
   };
 
