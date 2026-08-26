@@ -11,7 +11,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
   const [activeSession, setActiveSession] = useState(null);
   const [mediaInfo, setMediaInfo] = useState(null);
 
-  // Upload Progress State (Ultra-Fast 0% to 100%)
+  // Upload Progress State (Smooth 3-Second Progress 0% to 100%)
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadSpeed, setUploadSpeed] = useState(0);
@@ -27,7 +27,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
   const [transferSpeed, setTransferSpeed] = useState(0);
   const [connectedPeer, setConnectedPeer] = useState(null);
 
-  // Handle Real File Upload with Ultra-Fast Lightning Speed
+  // Handle Real File Upload with Smooth 3-Second 0-100% Progress
   const handleFileUpload = async (e) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -46,20 +46,20 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
       setUploadProgress(0);
       setShowBoomSurprise(false);
 
-      // Create session in transfer store instantly
+      // Create session in transfer store
       const session = await TransferStore.createSession(fileToUpload);
-      setActiveSession(session);
 
-      // Lightning fast 0% to 100% upload progress (~250ms)
+      // Smooth 3-second 0% to 100% progress interval (~3000ms total)
       let pct = 0;
       const interval = setInterval(() => {
-        pct += 35;
-        setUploadSpeed((Math.random() * 80 + 350).toFixed(1)); // 350-430 MB/s ultra speed!
+        pct += Math.floor(Math.random() * 8) + 5; // ~15 steps over 3 seconds
+        setUploadSpeed((Math.random() * 50 + 185).toFixed(1)); // 185-235 MB/s speed
 
         if (pct >= 100) {
           pct = 100;
           clearInterval(interval);
           setIsUploading(false);
+          setActiveSession(session);
           setShowBoomSurprise(true);
 
           // FIRE CONFETTI BOOM SURPRISE 🎉
@@ -74,7 +74,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
           setTimeout(() => setShowBoomSurprise(false), 4000);
         }
         setUploadProgress(pct);
-      }, 50);
+      }, 150);
 
       setIsTransferring(false);
       setTransferProgress(0);
@@ -126,8 +126,8 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
         } catch (e) {}
       }
       setTransferProgress(progressVal);
-      setTransferSpeed((Math.random() * 40 + 250).toFixed(1));
-    }, 100);
+      setTransferSpeed((Math.random() * 40 + 210).toFixed(1));
+    }, 120);
   };
 
   const renderIcon = (iconName) => {
@@ -204,14 +204,14 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
 
             <div className="w-full h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
               <div
-                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 transition-all duration-75"
+                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 transition-all duration-150"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
 
             <div className="flex justify-between text-xs font-mono text-slate-400">
               <span>{uploadProgress}% Uploaded</span>
-              <span>{selectedFile?.name}</span>
+              <span className="truncate max-w-[180px]">{selectedFile?.name}</span>
             </div>
           </div>
         )}
