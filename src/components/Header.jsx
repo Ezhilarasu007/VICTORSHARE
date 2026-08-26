@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Lock, ChevronDown } from 'lucide-react';
+import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../utils/languageStore';
 
-export function Header({ activeTab, setActiveTab, openPermissionsModal, openDonateModal, openInfoModal }) {
+export function Header({ activeTab, setActiveTab, openPermissionsModal, openDonateModal }) {
   const { lang, setLang, t, LANGUAGES } = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
 
@@ -83,6 +83,16 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
           >
             <History className="w-3.5 h-3.5" />
             <span>{t('history')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all ${
+              activeTab === 'reviews' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Star className="w-3.5 h-3.5 fill-current" />
+            <span>Ratings</span>
           </button>
         </nav>
 

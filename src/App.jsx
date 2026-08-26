@@ -5,11 +5,12 @@ import { SendPage } from './components/SendPage';
 import { ReceivePage } from './components/ReceivePage';
 import { VideoCompressor } from './components/VideoCompressor';
 import { TransferHistory } from './components/TransferHistory';
+import { UserReviews } from './components/UserReviews';
 import { PermissionsModal } from './components/PermissionsModal';
 import { DonateModal } from './components/DonateModal';
 import { InfoModal } from './components/InfoModal';
 import { LanguageProvider } from './utils/languageStore';
-import { Shield, Lock, Heart, Globe, Mail } from 'lucide-react';
+import { Shield, Lock, Heart, Globe, Mail, Star } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -40,7 +41,6 @@ export default function App() {
           setActiveTab={setActiveTab}
           openPermissionsModal={() => setIsPermissionsOpen(true)}
           openDonateModal={() => setIsDonateOpen(true)}
-          openInfoModal={(tab) => setInfoTab(tab)}
         />
 
         {/* Main Body View Switcher */}
@@ -82,6 +82,10 @@ export default function App() {
               onClear={() => setHistory([])}
             />
           )}
+
+          {activeTab === 'reviews' && (
+            <UserReviews />
+          )}
         </main>
 
         {/* Global 2026 Footer with Legal Links & Donate */}
@@ -116,6 +120,11 @@ export default function App() {
               <button onClick={() => setInfoTab('contact')} className="hover:text-cyan-400 transition-all flex items-center gap-1">
                 <Mail className="w-3.5 h-3.5 text-pink-400" />
                 <span>Contact Us</span>
+              </button>
+              <span className="text-slate-700">•</span>
+              <button onClick={() => setActiveTab('reviews')} className="hover:text-amber-400 transition-all flex items-center gap-1">
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <span>Ratings (4.9/5)</span>
               </button>
               <span className="text-slate-700">•</span>
               <button onClick={() => setIsDonateOpen(true)} className="hover:text-pink-400 text-pink-400 font-black transition-all flex items-center gap-1">
