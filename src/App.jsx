@@ -9,6 +9,7 @@ import { ImageOptimizer } from './components/ImageOptimizer';
 import { SpeedTestTool } from './components/SpeedTestTool';
 import { PhonkGenerator } from './components/PhonkGenerator';
 import { YouTubeSeoTool } from './components/YouTubeSeoTool';
+import { MusicVisualizerTool } from './components/MusicVisualizerTool';
 import { AdminDashboard } from './components/AdminDashboard';
 import { TransferHistory } from './components/TransferHistory';
 import { UserReviews } from './components/UserReviews';
@@ -25,6 +26,7 @@ export default function App() {
     if (path === '/send') return 'send';
     if (path === '/receive') return 'receive';
     if (path === '/compressor') return 'compressor';
+    if (path === '/visualizer') return 'visualizer';
     if (path === '/phonk-generator') return 'phonk-generator';
     if (path === '/youtube-seo') return 'youtube-seo';
     if (path === '/audio-extractor') return 'audio-extractor';
@@ -139,6 +141,10 @@ export default function App() {
               permissions={permissions}
               openPermissionsModal={() => setIsPermissionsOpen(true)}
             />
+          )}
+
+          {activeTab === 'visualizer' && (
+            <MusicVisualizerTool onBackHome={() => setActiveTab('home')} />
           )}
 
           {activeTab === 'phonk-generator' && (

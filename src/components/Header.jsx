@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown, Music, Image, Zap, Lock, Sparkles, BarChart2 } from 'lucide-react';
+import { ShieldCheck, HardDrive, Send, Download, Sliders, History, Heart, Globe, Star, HelpCircle, ChevronDown, Music, Image, Zap, Lock, Sparkles, BarChart2, Disc, Layers } from 'lucide-react';
 import { useLanguage } from '../utils/languageStore';
 
 export function Header({ activeTab, setActiveTab, openPermissionsModal, openDonateModal, openGuideModal }) {
@@ -87,7 +87,15 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
             </button>
 
             {isToolsOpen && (
-              <div className="absolute left-0 mt-2 w-52 glass-panel rounded-2xl p-2 border border-slate-700 shadow-2xl z-50 space-y-1 text-left">
+              <div className="absolute left-0 mt-2 w-56 glass-panel rounded-2xl p-2 border border-slate-700 shadow-2xl z-50 space-y-1 text-left">
+                <button
+                  onClick={() => { setActiveTab('visualizer'); setIsToolsOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center space-x-2"
+                >
+                  <Disc className="w-4 h-4 text-cyan-400" />
+                  <span>Audio Spectrum Visualizer</span>
+                </button>
+
                 <button
                   onClick={() => { setActiveTab('phonk-generator'); setIsToolsOpen(false); }}
                   className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center space-x-2"
@@ -100,7 +108,7 @@ export function Header({ activeTab, setActiveTab, openPermissionsModal, openDona
                   onClick={() => { setActiveTab('youtube-seo'); setIsToolsOpen(false); }}
                   className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center space-x-2"
                 >
-                  <BarChart2 className="w-4 h-4 text-cyan-400" />
+                  <BarChart2 className="w-4 h-4 text-purple-400" />
                   <span>YouTube Video SEO Generator</span>
                 </button>
 
