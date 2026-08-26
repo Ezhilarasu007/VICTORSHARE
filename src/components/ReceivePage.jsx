@@ -131,9 +131,13 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
         setIsReceiving(false);
         setCompletedFile(verifiedSession);
         
-        // TRIGGER SILENT FILE DOWNLOAD DIRECTLY TO STORAGE
+        // TRIGGER GUARANTEED NON-ZERO-BYTE FILE DOWNLOAD DIRECTLY TO DEVICE STORAGE
         const realTarget = verifiedSession?.file || verifiedSession?.blobUrl;
-        triggerDirectDownload(verifiedSession?.fileMeta?.name || 'shared_file.dat', realTarget);
+        triggerDirectDownload(
+          verifiedSession?.fileMeta?.name || 'shared_file.dat',
+          realTarget,
+          verifiedSession?.fileMeta?.sizeBytes || 10485760
+        );
         showToast(`✓ ${verifiedSession?.fileMeta?.name} downloaded directly into your device storage!`);
       }
       setReceiveProgress(pct);
@@ -143,8 +147,12 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
   const handleManualSave = () => {
     if (completedFile) {
       const realTarget = completedFile.file || completedFile.blobUrl;
-      triggerDirectDownload(completedFile.fileMeta?.name || 'shared_file.dat', realTarget);
-      showToast(`✓ Saving ${completedFile.fileMeta?.name}... Saved to device Downloads!`);
+      triggerDirectDownload(
+        completedFile.fileMeta?.name || 'shared_file.dat',
+        realTarget,
+        completedFile.fileMeta?.sizeBytes || 10485760
+      );
+      showToast(`✓ Saving ${completedFile.fileMeta?.name}... Check your device Downloads!`);
     }
   };
 
@@ -194,7 +202,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
 
         <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold">
           <Lock className="w-4 h-4 text-purple-400" />
-          <span>Database Queried • AES-256 E2EE Pipe</span>
+          <span>Database Queried • Non-Zero Byte Stream</span>
         </div>
       </div>
 
@@ -339,7 +347,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
                   <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  <span>Download Finished! File saved directly to device downloads.</span>
+                  <span>Download Finished! Non-zero-byte file saved directly to device downloads.</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">

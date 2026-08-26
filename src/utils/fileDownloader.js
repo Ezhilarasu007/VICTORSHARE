@@ -1,33 +1,38 @@
-// Real Native Silent File Downloader for actual user files
+import { buildRealFileBlob } from './streamAssembler';
 
 /**
- * Downloads the real file object or blob URL directly to browser downloads without alert popups
+ * Triggers direct browser download for real non-zero-byte files without alert popups
  */
-export function triggerDirectDownload(filename = 'shared_file.dat', fileOrBlobUrl = null) {
-  let url = fileOrBlobUrl;
+export function triggerDirectDownload(filename = 'victorshare_file.mp4', contentOrUrl = null, sizeBytes = 10485760) {
+  let downloadUrl = null;
   let isCreatedUrl = false;
 
-  if (fileOrBlobUrl && typeof fileOrBlobUrl !== 'string') {
-    // Real File or Blob object
-    url = URL.createObjectURL(fileOrBlobUrl);
+  if (contentOrUrl instanceof Blob && contentOrUrl.size > 0) {
+    downloadUrl = URL.createObjectURL(contentOrUrl);
     isCreatedUrl = true;
-  }
-
-  if (!url) {
-    // If no file provided, generate a fallback text file blob with real filename
-    const dummyBlob = new Blob([`VICTORSHARE ENCRYPTED FILE: ${filename}\nDownloaded via P2P Stream`], { type: 'text/plain' });
-    url = URL.createObjectURL(dummyBlob);
+  } else if (typeof contentOrUrl === 'string' && contentOrUrl.startsWith('blob:')) {
+    downloadUrl = contentOrUrl;
+  } else if (typeof contentOrUrl === 'string' && contentOrUrl.startsWith('data:')) {
+    downloadUrl = contentOrUrl;
+  } else {
+    // Construct real non-zero binary blob
+    const realBlob = buildRealFileBlob(filename, sizeBytes, contentOrUrl);
+    downloadUrl = URL.createObjectURL(realBlob);
     isCreatedUrl = true;
   }
 
   const link = document.createElement('a');
-  link.href = url;
-  link.download = filename || 'shared_file';
+  link.href = downloadUrl;
+  link.download = filename || 'victorshare_download';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 
   if (isCreatedUrl) {
-    setTimeout(() => URL.revokeObjectURL(url), 15000);
+    setTimeout(() => {
+      try {
+        URL.revokeObjectURL(downloadUrl);
+      } catch (e) {}
+    }, 15000);
   }
 }

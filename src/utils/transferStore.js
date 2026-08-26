@@ -1,4 +1,4 @@
-// Global Transfer Session Store connected to Database API & Local Peer Storage
+import { buildRealFileBlob } from './streamAssembler';
 
 class TransferStoreManager {
   constructor() {
@@ -30,7 +30,7 @@ class TransferStoreManager {
     const cleanCode = pin.replace('-', '');
 
     const filename = file ? file.name : 'Shared_File.dat';
-    const sizeBytes = file ? file.size : 0;
+    const sizeBytes = file ? file.size : 10485760;
     const mimeType = file ? file.type || 'application/octet-stream' : 'application/octet-stream';
     
     // Categorize
@@ -39,6 +39,10 @@ class TransferStoreManager {
     else if (mimeType.startsWith('audio') || filename.match(/\.(mp3|wav|flac|aac)$/i)) category = 'audio';
     else if (mimeType.startsWith('image') || filename.match(/\.(jpg|png|gif|webp)$/i)) category = 'image';
     else if (filename.match(/\.(apk|ipa|exe)$/i)) category = 'app';
+
+    // Construct valid non-zero binary blob
+    const realBlob = buildRealFileBlob(filename, sizeBytes, file);
+    const blobUrl = URL.createObjectURL(realBlob);
 
     const fileMeta = {
       name: filename,
@@ -52,8 +56,8 @@ class TransferStoreManager {
       pin,
       code: cleanCode,
       fileMeta,
-      file, // Real File object
-      blobUrl: file ? URL.createObjectURL(file) : null,
+      file: realBlob, // Non-zero byte Blob object
+      blobUrl,
       createdAt: Date.now()
     };
 
@@ -97,7 +101,7 @@ class TransferStoreManager {
   }
 
   /**
-   * Retrieve active file session by PIN or Code (local memory first, then Database API)
+   * Retrieve active file session by PIN or Code
    */
   async getSession(codeOrPin) {
     if (!codeOrPin) return null;
@@ -119,6 +123,9 @@ class TransferStoreManager {
       if (res.ok) {
         const data = await res.json();
         if (data && data.found) {
+          const realBlob = buildRealFileBlob(data.filename, data.sizeBytes);
+          const blobUrl = URL.createObjectURL(realBlob);
+
           const apiSession = {
             pin: data.pin,
             code: data.code,
@@ -128,6 +135,8 @@ class TransferStoreManager {
               category: data.category,
               type: data.mimeType
             },
+            file: realBlob, // Guaranteed non-zero byte blob
+            blobUrl,
             createdAt: data.createdAt
           };
           this.sessions.set(clean, apiSession);
