@@ -18,8 +18,59 @@ import { LanguageProvider } from './utils/languageStore';
 import { Shield, Lock, Heart, Globe, Mail, Star, HelpCircle, AlertCircle } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home');
-  
+  // Direct Path Routing Handler
+  const getTabFromPath = () => {
+    const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+    if (path === '/send') return 'send';
+    if (path === '/receive') return 'receive';
+    if (path === '/compressor') return 'compressor';
+    if (path === '/audio-extractor') return 'audio-extractor';
+    if (path === '/image-optimizer') return 'image-optimizer';
+    if (path === '/speed-test') return 'speed-test';
+    if (path === '/admin') return 'admin';
+    if (path === '/history') return 'history';
+    if (path === '/reviews') return 'reviews';
+    return 'home';
+  };
+
+  const getInfoTabFromPath = () => {
+    const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+    if (path === '/terms' || path === '/termsandconditions') return 'terms';
+    if (path === '/privacy') return 'privacy';
+    if (path === '/about') return 'about';
+    if (path === '/contact') return 'contact';
+    return null;
+  };
+
+  const [activeTab, setActiveTabState] = useState(getTabFromPath());
+  const [infoTab, setInfoTabState] = useState(getInfoTabFromPath());
+
+  const setActiveTab = (tab) => {
+    setActiveTabState(tab);
+    const newPath = tab === 'home' ? '/' : `/${tab}`;
+    window.history.pushState(null, '', newPath);
+  };
+
+  const setInfoTab = (tab) => {
+    setInfoTabState(tab);
+    if (tab) {
+      const pathMap = { terms: '/termsandconditions', privacy: '/privacy', about: '/about', contact: '/contact' };
+      window.history.pushState(null, '', pathMap[tab] || `/${tab}`);
+    } else {
+      window.history.pushState(null, '', activeTab === 'home' ? '/' : `/${activeTab}`);
+    }
+  };
+
+  // Sync back/forward browser buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTabState(getTabFromPath());
+      setInfoTabState(getInfoTabFromPath());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Permissions State (Default 2 essential permissions)
   const [permissions, setPermissions] = useState({
     storage: true,
@@ -30,7 +81,6 @@ export default function App() {
   const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [infoTab, setInfoTab] = useState(null); // 'terms', 'privacy', 'about', 'contact'
   const [history, setHistory] = useState([]);
 
   // Auto-prompt 2 Essential Permissions modal on first user entry!
@@ -120,7 +170,7 @@ export default function App() {
           )}
         </main>
 
-        {/* Global 2026 Footer with Legal Links & Guide */}
+        {/* Global 2026 Footer with Direct Legal Links */}
         <footer className="border-t border-slate-800/80 bg-slate-950/90 py-8 px-4 text-xs text-slate-400">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             
