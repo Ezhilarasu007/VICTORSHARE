@@ -7,6 +7,8 @@ import { VideoCompressor } from './components/VideoCompressor';
 import { AudioExtractor } from './components/AudioExtractor';
 import { ImageOptimizer } from './components/ImageOptimizer';
 import { SpeedTestTool } from './components/SpeedTestTool';
+import { PhonkGenerator } from './components/PhonkGenerator';
+import { YouTubeSeoTool } from './components/YouTubeSeoTool';
 import { AdminDashboard } from './components/AdminDashboard';
 import { TransferHistory } from './components/TransferHistory';
 import { UserReviews } from './components/UserReviews';
@@ -18,12 +20,13 @@ import { LanguageProvider } from './utils/languageStore';
 import { Shield, Lock, Heart, Globe, Mail, Star, HelpCircle, AlertCircle } from 'lucide-react';
 
 export default function App() {
-  // Direct Path Routing Handler
   const getTabFromPath = () => {
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
     if (path === '/send') return 'send';
     if (path === '/receive') return 'receive';
     if (path === '/compressor') return 'compressor';
+    if (path === '/phonk-generator') return 'phonk-generator';
+    if (path === '/youtube-seo') return 'youtube-seo';
     if (path === '/audio-extractor') return 'audio-extractor';
     if (path === '/image-optimizer') return 'image-optimizer';
     if (path === '/speed-test') return 'speed-test';
@@ -61,7 +64,6 @@ export default function App() {
     }
   };
 
-  // Sync back/forward browser buttons
   useEffect(() => {
     const handlePopState = () => {
       setActiveTabState(getTabFromPath());
@@ -71,19 +73,16 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Permissions State (Default 2 essential permissions)
   const [permissions, setPermissions] = useState({
     storage: true,
     network: true
   });
 
-  // Modal states
   const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [history, setHistory] = useState([]);
 
-  // Auto-prompt 2 Essential Permissions modal on first user entry!
   useEffect(() => {
     const hasPrompted = sessionStorage.getItem('victorshare_permissions_prompted');
     if (!hasPrompted) {
@@ -140,6 +139,14 @@ export default function App() {
               permissions={permissions}
               openPermissionsModal={() => setIsPermissionsOpen(true)}
             />
+          )}
+
+          {activeTab === 'phonk-generator' && (
+            <PhonkGenerator onBackHome={() => setActiveTab('home')} />
+          )}
+
+          {activeTab === 'youtube-seo' && (
+            <YouTubeSeoTool onBackHome={() => setActiveTab('home')} />
           )}
 
           {activeTab === 'audio-extractor' && (
