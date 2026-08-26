@@ -1,64 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Upload, HardDrive, Lock, ShieldCheck, Copy, Check, Radio, Send, CheckCircle2, RefreshCw, Smartphone, ArrowLeft, Sparkles, Folder, Image, Film, FileText, Package, Globe, Clock } from 'lucide-react';
+import { Upload, HardDrive, Lock, ShieldCheck, Copy, Check, Send, CheckCircle2, RefreshCw, Smartphone, ArrowLeft, Film, Image, Music, Package, FileText, Globe, Clock } from 'lucide-react';
 import { formatBytes } from '../utils/videoEngine';
 import { TransferStore } from '../utils/transferStore';
+import { classifyFile } from '../utils/mediaClassifier';
 
 export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
-  // Real File Upload State - Default is null (NO HARDCODED MOCK FILES!)
   const [selectedFile, setSelectedFile] = useState(null);
   const [activeSession, setActiveSession] = useState(null);
+  const [mediaInfo, setMediaInfo] = useState(null);
 
   const [timeLeft, setTimeLeft] = useState(120);
   const [isCopied, setIsCopied] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
 
-  // Transfer Stream State
+  // Active P2P Stream State
   const [isTransferring, setIsTransferring] = useState(false);
   const [transferProgress, setTransferProgress] = useState(0);
   const [transferSpeed, setTransferSpeed] = useState(0);
   const [connectedPeer, setConnectedPeer] = useState(null);
 
-  // Auto-countdown timer for session PIN
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          if (selectedFile) {
-            const newSession = TransferStore.createSession(selectedFile.rawFile || selectedFile);
-            setActiveSession(newSession);
-          }
-          return 120;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [selectedFile]);
-
-  // Handle Real File Selection
-  const handleFileUpload = (e) => {
+  // Handle Real File Upload
+  const handleFileUpload = async (e) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      let fileToSession;
+      const fileToUpload = files[0];
 
-      if (files.length > 1) {
-        let total = 0;
-        for (let i = 0; i < files.length; i++) total += files[i].size;
-        fileToSession = new File([files[0]], `📁 Shared_Folder_Bundle (${files.length} items).zip`, { type: 'application/zip' });
-      } else {
-        fileToSession = files[0];
-      }
+      const info = classifyFile(fileToUpload.name, fileToUpload.type);
+      setMediaInfo(info);
 
-      const session = TransferStore.createSession(fileToSession);
       setSelectedFile({
-        name: fileToSession.name,
-        sizeBytes: fileToSession.size,
-        type: fileToSession.type,
-        rawFile: fileToSession
+        name: fileToUpload.name,
+        sizeBytes: fileToUpload.size,
+        type: fileToUpload.type,
+        rawFile: fileToUpload
       });
+
+      const session = await TransferStore.createSession(fileToUpload);
       setActiveSession(session);
+
       setIsTransferring(false);
       setTransferProgress(0);
       setTimeLeft(120);
@@ -105,20 +85,20 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
     }, 150);
   };
 
-  const getCategoryIcon = (type = '') => {
-    if (type.includes('video')) return Film;
-    if (type.includes('image')) return Image;
-    if (type.includes('pdf')) return FileText;
-    if (type.includes('zip') || type.includes('folder')) return Folder;
-    return HardDrive;
+  const renderIcon = (iconName) => {
+    if (iconName === 'Film') return Film;
+    if (iconName === 'Music') return Music;
+    if (iconName === 'Image') return Image;
+    if (iconName === 'Package') return Package;
+    return FileText;
   };
 
-  const CategoryIcon = selectedFile ? getCategoryIcon(selectedFile.type) : Upload;
+  const MediaIcon = mediaInfo ? renderIcon(mediaInfo.iconName) : Upload;
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto px-4 py-6">
       
-      {/* Top Header */}
+      {/* Back Header */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBackHome}
@@ -130,26 +110,25 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
 
         <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-950/90 border border-cyan-500/50 text-cyan-300 text-xs font-mono font-bold">
           <Lock className="w-4 h-4 text-cyan-400" />
-          <span>AES-256 E2EE Private Transfer</span>
+          <span>Database Saved • AES-256 E2EE Pipe</span>
         </div>
       </div>
 
       {/* Title */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl sm:text-4xl font-black text-white">
-          Upload Any Real File or Video <span className="text-gradient-cyan">(Up to 100GB)</span>
+          Upload Real File or Video <span className="text-gradient-cyan">(10MB to 100GB)</span>
         </h1>
         <p className="text-xs text-slate-400 max-w-lg mx-auto">
-          Tap below to pick any real file from your device. Your encrypted transfer PIN generates automatically!
+          Select any real Video, Audio, Photo, App, or PDF from your device. Your encrypted PIN code generates automatically!
         </p>
       </div>
 
-      {/* STEP 1: Upload Dropzone (NO HARDCODED FILES!) */}
+      {/* STEP 1: Upload Dropzone */}
       <div className="glass-panel p-8 rounded-3xl border-2 border-dashed border-cyan-500/50 hover:border-cyan-400 text-center space-y-6 transition-all relative shadow-2xl">
         
         <input
           type="file"
-          multiple
           onChange={handleFileUpload}
           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
         />
@@ -163,18 +142,21 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
             {selectedFile ? 'Tap to Change File' : 'Tap to Add Real File or Video'}
           </h2>
           <p className="text-xs text-slate-300 max-w-md mx-auto">
-            Select Videos, Photos, Documents, Audio, or Folders from your phone/PC.
+            Pick Movies, Songs, Photos, Apps, PDFs, or Archives from device storage.
           </p>
         </div>
 
         {/* Selected File Details */}
-        {selectedFile && (
+        {selectedFile && mediaInfo && (
           <div className="inline-flex items-center space-x-4 px-6 py-4 rounded-2xl bg-slate-950 border-2 border-cyan-500/60 text-xs font-bold text-white shadow-2xl z-20 relative text-left">
-            <CategoryIcon className="w-7 h-7 text-cyan-400 flex-shrink-0" />
+            <MediaIcon className="w-7 h-7 text-cyan-400 flex-shrink-0" />
             <div>
               <div className="font-black text-cyan-300 text-base truncate max-w-md">{selectedFile.name}</div>
-              <div className="text-xs text-slate-300 font-mono mt-0.5">
-                Exact Size: <span className="text-emerald-400 font-bold">{formatBytes(selectedFile.sizeBytes)}</span>
+              <div className="text-xs text-slate-300 font-mono mt-0.5 flex items-center space-x-2">
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded border uppercase ${mediaInfo.badgeColor}`}>
+                  {mediaInfo.label}
+                </span>
+                <span>Exact Size: <strong className="text-emerald-400">{formatBytes(selectedFile.sizeBytes)}</strong></span>
               </div>
             </div>
           </div>
@@ -182,26 +164,24 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
 
       </div>
 
-      {/* STEP 2: AUTO-GENERATED ENCRYPTED PIN (IF FILE SELECTED) */}
+      {/* STEP 2: AUTO-GENERATED ENCRYPTED PIN */}
       {activeSession && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
           
-          {/* Left: Auto-Displayed Encrypted PIN */}
+          {/* Left: PIN Code */}
           <div className="glass-card p-6 sm:p-8 rounded-3xl space-y-6 text-center border border-cyan-500/50 relative shadow-2xl">
-            
             <div>
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-950 border border-cyan-500/50 text-[10px] font-mono font-bold text-cyan-300">
                 <Clock className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
-                <span>PIN Expires in {timeLeft}s</span>
+                <span>Expires in {timeLeft}s</span>
               </div>
 
               <h3 className="text-xl font-black text-white mt-3">Auto-Generated Transfer Code</h3>
               <p className="text-xs text-slate-300 mt-1">
-                Share this PIN code with your recipient to download your real file.
+                Your friend enters this code on her device to download the exact file into her storage.
               </p>
             </div>
 
-            {/* Huge PIN Code Display */}
             <div className="p-6 rounded-2xl bg-slate-950 border-2 border-cyan-500/70 space-y-4 shadow-inner">
               <div className="font-mono text-5xl sm:text-6xl font-black text-gradient-cyan tracking-widest">
                 {activeSession.pin}
@@ -227,16 +207,15 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
             </div>
 
             <div className="text-[11px] text-slate-400">
-              🔒 100% End-to-End Encrypted • Zero Server Retention
+              🔒 Database Verified • 100% Private Encrypted Channel
             </div>
-
           </div>
 
-          {/* Right: QR Code Scanner */}
+          {/* Right: QR Code */}
           <div className="glass-card p-6 sm:p-8 rounded-3xl space-y-6 text-center border border-slate-800 shadow-2xl">
             <div>
               <h3 className="text-xl font-black text-white">Mobile QR Scan Pair</h3>
-              <p className="text-xs text-slate-400">Scan with iPhone Camera or Android Phone</p>
+              <p className="text-xs text-slate-400">Scan with iOS iPhone Camera or Android Phone</p>
             </div>
 
             <div className="inline-block p-4 rounded-2xl bg-white shadow-2xl border-4 border-cyan-400">
@@ -287,7 +266,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
         <div className="p-5 rounded-2xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-sm font-bold flex items-center space-x-3 shadow-xl">
           <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
           <div>
-            <h4>Real File Delivered Successfully!</h4>
+            <h4>Real File Delivered Privately!</h4>
             <p className="text-xs text-slate-300 font-mono font-normal">
               {selectedFile?.name} was downloaded directly into recipient's device storage.
             </p>

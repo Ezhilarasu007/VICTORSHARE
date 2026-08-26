@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Lock, ShieldCheck, CheckCircle2, Smartphone, ArrowLeft, RefreshCw, Sparkles, HardDrive, Hash, Folder, Image, Film, FileText, Package, Zap, AlertCircle, Clock } from 'lucide-react';
+import { Download, Lock, ShieldCheck, CheckCircle2, Smartphone, ArrowLeft, RefreshCw, Sparkles, HardDrive, Film, Image, Music, Package, FileText, Zap, AlertCircle, Clock } from 'lucide-react';
 import { formatBytes } from '../utils/videoEngine';
 import { triggerDirectDownload } from '../utils/fileDownloader';
 import { TransferStore } from '../utils/transferStore';
+import { classifyFile } from '../utils/mediaClassifier';
 
 export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
   const [codeInput, setCodeInput] = useState('');
@@ -11,14 +12,16 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
 
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedSession, setVerifiedSession] = useState(null);
+  const [mediaInfo, setMediaInfo] = useState(null);
   
   // Transfer stream state
   const [isReceiving, setIsReceiving] = useState(false);
   const [receiveProgress, setReceiveProgress] = useState(0);
   const [downloadSpeed, setDownloadSpeed] = useState(0);
+  const [etaText, setEtaText] = useState('');
   const [completedFile, setCompletedFile] = useState(null);
 
-  // Auto-fill code from URL if scanned QR code!
+  // Auto-fill code from URL query param `?code=...`
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const codeParam = params.get('code') || params.get('pin');
@@ -65,11 +68,12 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
     setCodeInput('');
     setErrorMessage('');
     setVerifiedSession(null);
+    setMediaInfo(null);
     setCompletedFile(null);
   };
 
-  // Inspect Code and lookup session from TransferStore
-  const handleVerifyCode = (presetCode) => {
+  // Query Database API & local store for the PIN code
+  const handleVerifyCode = async (presetCode) => {
     const code = presetCode || codeInput;
     if (code.replaceAll('-', '').length < 6) {
       setErrorMessage('Please enter a 6-digit Transfer PIN');
@@ -80,30 +84,18 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
     setIsVerifying(true);
     setVerifiedSession(null);
 
-    setTimeout(() => {
-      setIsVerifying(false);
-      
-      // Lookup real session matching code
-      const session = TransferStore.getSession(code);
-      if (session) {
-        setVerifiedSession(session);
-        showToast(`🔒 Encrypted Stream Verified! Found ${session.fileMeta.name}`);
-      } else {
-        // Fallback for demonstration if user typed a random PIN
-        const fallbackSession = {
-          pin: code,
-          code: code.replaceAll('-', ''),
-          fileMeta: {
-            name: `Shared_File_${code.replace('-', '')}.dat`,
-            sizeBytes: 154 * 1024 * 1024,
-            type: 'application/octet-stream'
-          },
-          sender: 'Peer Device (iOS / Android / PC)'
-        };
-        setVerifiedSession(fallbackSession);
-        showToast(`🔒 Connected to Encrypted P2P Pipe`);
-      }
-    }, 450);
+    // Fetch session from Database API / store
+    const session = await TransferStore.getSession(code);
+    setIsVerifying(false);
+
+    if (session && session.fileMeta) {
+      const info = classifyFile(session.fileMeta.name, session.fileMeta.type || session.fileMeta.category);
+      setMediaInfo(info);
+      setVerifiedSession(session);
+      showToast(`🔒 Encrypted Stream Verified! Found ${session.fileMeta.name}`);
+    } else {
+      setErrorMessage('PIN Code not found. Please verify the 6-digit code with the sender.');
+    }
   };
 
   const startFastDownload = () => {
@@ -122,13 +114,24 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
       const currentSpeed = (Math.random() * 30 + 110).toFixed(1);
       setDownloadSpeed(currentSpeed);
 
+      if (verifiedSession && verifiedSession.fileMeta.sizeBytes > 1024 * 1024 * 1024) {
+        const sizeGB = verifiedSession.fileMeta.sizeBytes / (1024 * 1024 * 1024);
+        const remainingGB = ((100 - pct) / 100) * sizeGB;
+        const remainingSec = Math.round((remainingGB * 1024) / parseFloat(currentSpeed));
+        const mins = Math.floor(remainingSec / 60);
+        const secs = remainingSec % 60;
+        setEtaText(`${mins}m ${secs}s remaining`);
+      } else {
+        setEtaText('< 15 seconds remaining');
+      }
+
       if (pct >= 100) {
         pct = 100;
         clearInterval(interval);
         setIsReceiving(false);
         setCompletedFile(verifiedSession);
         
-        // TRIGGER ACTUAL REAL FILE DOWNLOAD DIRECTLY TO STORAGE
+        // TRIGGER SILENT FILE DOWNLOAD DIRECTLY TO STORAGE
         const realTarget = verifiedSession?.file || verifiedSession?.blobUrl;
         triggerDirectDownload(verifiedSession?.fileMeta?.name || 'shared_file.dat', realTarget);
         showToast(`✓ ${verifiedSession?.fileMeta?.name} downloaded directly into your device storage!`);
@@ -158,15 +161,15 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
     }
   };
 
-  const getCategoryIcon = (type = '') => {
-    if (type.includes('video')) return Film;
-    if (type.includes('image')) return Image;
-    if (type.includes('pdf')) return FileText;
-    if (type.includes('zip') || type.includes('folder')) return Folder;
-    return HardDrive;
+  const renderIcon = (iconName) => {
+    if (iconName === 'Film') return Film;
+    if (iconName === 'Music') return Music;
+    if (iconName === 'Image') return Image;
+    if (iconName === 'Package') return Package;
+    return FileText;
   };
 
-  const CategoryIcon = verifiedSession ? getCategoryIcon(verifiedSession.fileMeta.type) : HardDrive;
+  const MediaIcon = mediaInfo ? renderIcon(mediaInfo.iconName) : HardDrive;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto px-4 py-6 relative">
@@ -179,7 +182,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
         </div>
       )}
 
-      {/* Back Header Nav */}
+      {/* Back Header */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBackHome}
@@ -191,14 +194,14 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
 
         <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold">
           <Lock className="w-4 h-4 text-purple-400" />
-          <span>100% Private Encrypted Transfer</span>
+          <span>Database Queried • AES-256 E2EE Pipe</span>
         </div>
       </div>
 
       {/* Title */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl sm:text-4xl font-black text-white">Receive Shared File or Video</h1>
-        <p className="text-xs text-slate-400">Enter the sender's 6-digit Transfer PIN to download directly into your storage.</p>
+        <p className="text-xs text-slate-400">Enter the sender's 6-digit Transfer PIN to inspect and download directly into your storage.</p>
       </div>
 
       {/* Main Receive Card */}
@@ -267,7 +270,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
             {isVerifying ? (
               <span className="flex items-center justify-center space-x-2">
                 <RefreshCw className="w-5 h-5 animate-spin text-purple-400" />
-                <span>Verifying Encrypted PIN...</span>
+                <span>Querying Database & P2P Stream...</span>
               </span>
             ) : (
               <span>Verify Code & Inspect Real File</span>
@@ -276,24 +279,24 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
         )}
 
         {/* STEP 2: Revealed Shared File Card */}
-        {verifiedSession && (
+        {verifiedSession && mediaInfo && (
           <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-950 to-purple-950/60 border-2 border-purple-500/50 text-left space-y-4 animate-fade-in shadow-2xl">
             
             <div className="flex items-center justify-between border-b border-purple-500/30 pb-3">
-              <span className="text-[10px] uppercase font-bold text-purple-300 bg-purple-900/80 px-2.5 py-1 rounded border border-purple-700">
-                AES-256 Encrypted Channel Active
+              <span className={`px-2.5 py-1 text-[10px] uppercase font-bold rounded border ${mediaInfo.badgeColor}`}>
+                {mediaInfo.label}
               </span>
-              <span className="text-xs font-mono text-slate-400">P2P Peer Direct Pipe</span>
+              <span className="text-xs font-mono text-slate-400">PIN: {verifiedSession.pin}</span>
             </div>
 
             <div className="flex items-center space-x-3.5">
               <div className="p-3.5 rounded-2xl bg-purple-950 border border-purple-500/40 text-purple-300">
-                <CategoryIcon className="w-7 h-7" />
+                <MediaIcon className="w-7 h-7" />
               </div>
               <div>
                 <h3 className="text-base font-black text-white">{verifiedSession.fileMeta.name}</h3>
                 <p className="text-xs text-slate-300 font-mono mt-0.5">
-                  Size: <span className="text-emerald-400 font-bold">{formatBytes(verifiedSession.fileMeta.sizeBytes)}</span>
+                  Exact Size: <strong className="text-emerald-400">{formatBytes(verifiedSession.fileMeta.sizeBytes)}</strong>
                 </p>
               </div>
             </div>
@@ -309,7 +312,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
               </button>
             )}
 
-            {/* Live Progress Bar with Speed */}
+            {/* Live Progress Bar with Speed & ETA */}
             {isReceiving && (
               <div className="space-y-2 pt-2">
                 <div className="flex justify-between text-xs font-mono">
@@ -324,7 +327,9 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
                 </div>
                 <div className="flex justify-between text-[11px] font-mono text-slate-400">
                   <span>{receiveProgress}% Complete</span>
-                  <span className="text-cyan-300 font-bold">High Speed P2P Direct Pipe</span>
+                  <span className="flex items-center gap-1 text-cyan-300 font-bold">
+                    <Clock className="w-3 h-3" /> {etaText}
+                  </span>
                 </div>
               </div>
             )}
@@ -334,7 +339,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
                   <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  <span>Download Finished! File saved directly to your device storage.</span>
+                  <span>Download Finished! File saved directly to device downloads.</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">

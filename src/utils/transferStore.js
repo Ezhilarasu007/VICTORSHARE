@@ -1,11 +1,10 @@
-// Real P2P Transfer Session Store using BroadcastChannel & local memory
+// Global Transfer Session Store connected to Database API & Local Peer Storage
 
 class TransferStoreManager {
   constructor() {
     this.sessions = new Map();
     this.listeners = new Set();
 
-    // Cross-tab broadcast channel for local peer communication
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
       this.channel = new BroadcastChannel('victorshare_p2p_channel');
       this.channel.onmessage = (event) => {
@@ -24,16 +23,28 @@ class TransferStoreManager {
   }
 
   /**
-   * Register a real file session created by sender
+   * Register a real file session created by sender & post to Database API
    */
-  createSession(file) {
+  async createSession(file) {
     const pin = this.generatePin();
     const cleanCode = pin.replace('-', '');
 
+    const filename = file ? file.name : 'Shared_File.dat';
+    const sizeBytes = file ? file.size : 0;
+    const mimeType = file ? file.type || 'application/octet-stream' : 'application/octet-stream';
+    
+    // Categorize
+    let category = 'document';
+    if (mimeType.startsWith('video') || filename.match(/\.(mp4|mkv|avi|mov|webm)$/i)) category = 'video';
+    else if (mimeType.startsWith('audio') || filename.match(/\.(mp3|wav|flac|aac)$/i)) category = 'audio';
+    else if (mimeType.startsWith('image') || filename.match(/\.(jpg|png|gif|webp)$/i)) category = 'image';
+    else if (filename.match(/\.(apk|ipa|exe)$/i)) category = 'app';
+
     const fileMeta = {
-      name: file ? file.name : 'Shared_File.dat',
-      sizeBytes: file ? file.size : 0,
-      type: file ? file.type || 'application/octet-stream' : 'application/octet-stream',
+      name: filename,
+      sizeBytes,
+      type: mimeType,
+      category,
       lastModified: file ? file.lastModified : Date.now()
     };
 
@@ -49,12 +60,27 @@ class TransferStoreManager {
     this.sessions.set(cleanCode, session);
     this.sessions.set(pin, session);
 
-    // Also store metadata in window for global access
     if (typeof window !== 'undefined') {
       window.__VICTORSHARE_SESSIONS__ = window.__VICTORSHARE_SESSIONS__ || {};
       window.__VICTORSHARE_SESSIONS__[cleanCode] = session;
       window.__VICTORSHARE_SESSIONS__[pin] = session;
     }
+
+    // POST to Vercel Serverless Database API / Python DB
+    try {
+      await fetch('/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pin,
+          code: cleanCode,
+          filename,
+          sizeBytes,
+          category,
+          mimeType
+        })
+      }).catch(() => {});
+    } catch (e) {}
 
     if (this.channel) {
       try {
@@ -71,21 +97,44 @@ class TransferStoreManager {
   }
 
   /**
-   * Retrieve active file session by PIN or Code
+   * Retrieve active file session by PIN or Code (local memory first, then Database API)
    */
-  getSession(codeOrPin) {
+  async getSession(codeOrPin) {
     if (!codeOrPin) return null;
     const clean = codeOrPin.replaceAll('-', '').trim();
 
-    // Check memory map
+    // 1. Check local memory map
     if (this.sessions.has(clean)) return this.sessions.get(clean);
     if (this.sessions.has(codeOrPin)) return this.sessions.get(codeOrPin);
 
-    // Check window global
+    // 2. Check window global
     if (typeof window !== 'undefined' && window.__VICTORSHARE_SESSIONS__) {
       if (window.__VICTORSHARE_SESSIONS__[clean]) return window.__VICTORSHARE_SESSIONS__[clean];
       if (window.__VICTORSHARE_SESSIONS__[codeOrPin]) return window.__VICTORSHARE_SESSIONS__[codeOrPin];
     }
+
+    // 3. Query Database API (`/api/session?code=...`)
+    try {
+      const res = await fetch(`/api/session?code=${clean}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.found) {
+          const apiSession = {
+            pin: data.pin,
+            code: data.code,
+            fileMeta: {
+              name: data.filename,
+              sizeBytes: data.sizeBytes,
+              category: data.category,
+              type: data.mimeType
+            },
+            createdAt: data.createdAt
+          };
+          this.sessions.set(clean, apiSession);
+          return apiSession;
+        }
+      }
+    } catch (e) {}
 
     return null;
   }
