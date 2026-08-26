@@ -1,22 +1,26 @@
 import React from 'react';
 import { Send, Download, ShieldCheck, Zap, Smartphone, HardDrive, Lock, ArrowRight, Sparkles, Globe, Wifi, Film, Package, FileText, Image } from 'lucide-react';
 
-export function HomePage({ onSelectSend, onSelectReceive, openPermissionsModal }) {
+export function HomePage({ setActiveTab, onSelectSend, onSelectReceive, openPermissionsModal }) {
+  const handleSend = onSelectSend || (() => setActiveTab && setActiveTab('send'));
+  const handleReceive = onSelectReceive || (() => setActiveTab && setActiveTab('receive'));
+
   return (
-    <div className="space-y-12 max-w-6xl mx-auto px-4 py-8">
+    <div className="space-y-10 max-w-6xl mx-auto px-4 py-8">
       
-      {/* Hero Header */}
+      {/* Hero Header & India's #1 Badge */}
       <div className="text-center space-y-4 max-w-3xl mx-auto">
-        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-bold uppercase tracking-wider shadow-lg shadow-cyan-500/10">
-          <Lock className="w-3.5 h-3.5 text-cyan-400" />
-          <span>100% Private • End-to-End Encrypted Worldwide Share</span>
+        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-orange-950 via-slate-950 to-emerald-950 border border-orange-500/40 text-xs font-bold text-orange-300 shadow-lg shadow-orange-500/10">
+          <span>🇮🇳</span>
+          <span className="text-white">India's #1 P2P File & Video Transfer Platform</span>
+          <span className="text-emerald-400 font-mono text-[10px]">100% Private</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
           Send & Receive Files or Videos up to <span className="text-gradient-cyan">100GB</span>
         </h1>
 
-        <p className="text-base text-slate-300 leading-relaxed">
+        <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
           High-speed encrypted file sharing between friends or worldwide. Share Videos, Photos, Android APK Apps, PDFs, and Folders from 10MB up to 100GB.
         </p>
       </div>
@@ -26,8 +30,8 @@ export function HomePage({ onSelectSend, onSelectReceive, openPermissionsModal }
         
         {/* SEND FILE CARD */}
         <div
-          onClick={onSelectSend}
-          className="group relative glass-panel p-8 rounded-3xl border-2 border-cyan-500/30 hover:border-cyan-400 cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-2xl hover:shadow-cyan-500/20 overflow-hidden flex flex-col justify-between min-h-[320px]"
+          onClick={handleSend}
+          className="group relative glass-panel p-8 rounded-3xl border-2 border-cyan-500/40 hover:border-cyan-400 cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-2xl hover:shadow-cyan-500/20 overflow-hidden flex flex-col justify-between min-h-[320px]"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
 
@@ -53,7 +57,7 @@ export function HomePage({ onSelectSend, onSelectReceive, openPermissionsModal }
 
           <div className="pt-6 flex items-center justify-between border-t border-slate-800">
             <span className="text-xs font-bold text-cyan-400 flex items-center gap-1">
-              Tap to Upload File <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Tap to Open Send Panel <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </span>
             <span className="text-[10px] text-slate-500 font-mono">AES-256 Encrypted</span>
           </div>
@@ -61,8 +65,8 @@ export function HomePage({ onSelectSend, onSelectReceive, openPermissionsModal }
 
         {/* RECEIVE FILE CARD */}
         <div
-          onClick={onSelectReceive}
-          className="group relative glass-panel p-8 rounded-3xl border-2 border-purple-500/30 hover:border-purple-400 cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-2xl hover:shadow-purple-500/20 overflow-hidden flex flex-col justify-between min-h-[320px]"
+          onClick={handleReceive}
+          className="group relative glass-panel p-8 rounded-3xl border-2 border-purple-500/40 hover:border-purple-400 cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-2xl hover:shadow-purple-500/20 overflow-hidden flex flex-col justify-between min-h-[320px]"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all pointer-events-none" />
 
@@ -88,7 +92,7 @@ export function HomePage({ onSelectSend, onSelectReceive, openPermissionsModal }
 
           <div className="pt-6 flex items-center justify-between border-t border-slate-800">
             <span className="text-xs font-bold text-purple-300 flex items-center gap-1">
-              Tap to Enter Code <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Tap to Open Receive Panel <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </span>
             <span className="text-[10px] text-slate-500 font-mono">No Server Account Required</span>
           </div>
@@ -122,10 +126,10 @@ export function HomePage({ onSelectSend, onSelectReceive, openPermissionsModal }
         <div className="glass-card p-5 rounded-2xl space-y-2 border border-slate-800">
           <div className="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
             <Lock className="w-4 h-4" />
-            <span>100% Private & Anonymous</span>
+            <span>100% Private & Zero Cloud Leak</span>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Direct WebRTC stream. Files pass securely between devices without storing personal data on servers.
+            Direct WebRTC P2P stream. Files pass securely between devices without storing personal data on cloud servers.
           </p>
         </div>
 
@@ -142,10 +146,10 @@ export function HomePage({ onSelectSend, onSelectReceive, openPermissionsModal }
         <div className="glass-card p-5 rounded-2xl space-y-2 border border-slate-800">
           <div className="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
             <Zap className="w-4 h-4" />
-            <span>Fast P2P Transfer</span>
+            <span>Fast P2P Direct Transfer</span>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
-            High-speed chunked stream pipeline with SHA-256 verification guarantees 100% accurate downloads.
+            High-speed chunked stream pipeline with exact byte verification guarantees 100% accurate file downloads.
           </p>
         </div>
 
