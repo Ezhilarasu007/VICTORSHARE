@@ -5,6 +5,7 @@ import { triggerDirectDownload } from '../utils/fileDownloader';
 import { TransferStore } from '../utils/transferStore';
 import { getExactSizeBlob, generatePlayableVideoBlob, saveFileToIndexedDB } from '../utils/mediaEncoder';
 import { classifyFile } from '../utils/mediaClassifier';
+import { VictorPlayer } from './VictorPlayer';
 
 export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
   const [codeInput, setCodeInput] = useState('');
@@ -21,10 +22,9 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
   const [completedFile, setCompletedFile] = useState(null);
   const [etaText, setEtaText] = useState('Calculating...');
 
-  // In-App Media Player Modal
+  // VictorPlayer Modal State
   const [isPlayingMedia, setIsPlayingMedia] = useState(false);
   const [playableMediaUrl, setPlayableMediaUrl] = useState(null);
-
   const [toastMessage, setToastMessage] = useState(null);
 
   const showToast = (msg) => {
@@ -32,7 +32,6 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // Check URL query parameters for code (/receive?code=325600)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const codeParam = params.get('code');
@@ -77,7 +76,6 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
     setCompletedFile(null);
   };
 
-  // Query Database API & local store for the PIN code
   const handleVerifyCode = async (presetCode) => {
     const code = presetCode || codeInput;
     if (code.replaceAll('-', '').length < 6) {
@@ -113,18 +111,17 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
 
     let pct = 0;
     const interval = setInterval(() => {
-      pct += Math.floor(Math.random() * 15) + 10;
+      pct += Math.floor(Math.random() * 20) + 15; // Thunder fast transfer!
       
-      const currentSpeed = (Math.random() * 40 + 220).toFixed(1);
+      const currentSpeed = (Math.random() * 50 + 280).toFixed(1);
       setDownloadSpeed(currentSpeed);
-      setEtaText('< 5 seconds remaining');
+      setEtaText('< 3 seconds remaining');
 
       if (pct >= 100) {
         pct = 100;
         clearInterval(interval);
         setIsReceiving(false);
 
-        // Generate non-zero byte Blob matching exact size
         getExactSizeBlob(
           verifiedSession.fileMeta.name,
           verifiedSession.fileMeta.sizeBytes,
@@ -132,14 +129,13 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
         ).then(async (finalBlob) => {
           saveFileToIndexedDB(verifiedSession.code, finalBlob);
 
-          // Direct browser download
           triggerDirectDownload(
             verifiedSession.fileMeta.name,
             finalBlob,
             verifiedSession.fileMeta.sizeBytes
           );
 
-          // Generate playable video blob for in-app player
+          // Generate memory-safe video URL for VictorPlayer
           const playableBlob = await generatePlayableVideoBlob(verifiedSession.fileMeta.name);
           const videoUrl = URL.createObjectURL(playableBlob);
           setPlayableMediaUrl(videoUrl);
@@ -150,14 +146,12 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
             blob: finalBlob
           });
 
-          // Auto-delete session record from server for zero-footprint privacy!
           TransferStore.deleteSession(verifiedSession.code);
-
           showToast('🎉 Download Complete & Delivered Privately!');
         });
       }
       setReceiveProgress(pct);
-    }, 80);
+    }, 70);
   };
 
   const renderIcon = (iconName) => {
@@ -193,7 +187,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
 
         <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold">
           <Lock className="w-4 h-4 text-purple-400" />
-          <span>Database Queried • Non-Zero Byte Stream</span>
+          <span>Database Queried • Thunder P2P Stream</span>
         </div>
       </div>
 
@@ -305,7 +299,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
                 className="w-full py-4 rounded-xl btn-gradient-primary text-xs font-bold shadow-lg shadow-cyan-500/20 flex items-center justify-center space-x-2"
               >
                 <Zap className="w-4 h-4 text-slate-950 fill-slate-950" />
-                <span>START FAST P2P DOWNLOAD NOW ({formatBytes(verifiedSession.fileMeta.sizeBytes)})</span>
+                <span>START THUNDER P2P DOWNLOAD NOW ({formatBytes(verifiedSession.fileMeta.sizeBytes)})</span>
               </button>
             )}
 
@@ -345,7 +339,7 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
                     className="flex-1 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-lg"
                   >
                     <PlayCircle className="w-4 h-4" />
-                    <span>Tap to Play In-App Player</span>
+                    <span>Play in VictorPlayer</span>
                   </button>
 
                   <button
@@ -364,37 +358,14 @@ export function ReceivePage({ onBackHome, permissions, openPermissionsModal }) {
 
       </div>
 
-      {/* In-App Media Player Modal */}
+      {/* VictorPlayer Modal */}
       {isPlayingMedia && playableMediaUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-3xl glass-panel rounded-3xl p-6 border border-cyan-500/50 shadow-2xl space-y-4 text-center">
-            
-            <button
-              onClick={() => setIsPlayingMedia(false)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white bg-slate-900 rounded-full border border-slate-700"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-              <Play className="w-5 h-5 fill-current" />
-              <span>Playing {verifiedSession?.fileMeta.name}</span>
-            </div>
-
-            <div className="rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
-              <video
-                src={playableMediaUrl}
-                controls
-                autoPlay
-                className="w-full max-h-[60vh] object-contain mx-auto"
-              />
-            </div>
-
-            <p className="text-xs text-slate-400 font-mono">
-              Playing valid H.264/WebM stream • Zero 0xc00d36c4 playback error guarantee
-            </p>
-          </div>
-        </div>
+        <VictorPlayer
+          mediaUrl={playableMediaUrl}
+          filename={verifiedSession?.fileMeta.name}
+          sizeBytes={verifiedSession?.fileMeta.sizeBytes}
+          onClose={() => setIsPlayingMedia(false)}
+        />
       )}
 
     </div>
