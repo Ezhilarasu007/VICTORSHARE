@@ -9,12 +9,12 @@ export function VideoCompressor({ onCompressionComplete, permissions, openPermis
   
   // Default values for 100GB video demo
   const [fileDetails, setFileDetails] = useState({
-    name: 'RAW_8K_CINEMATIC_MASTER_100GB.mov',
+    name: 'SAMPLE_VIDEO_MASTER_100GB.mov',
     sizeBytes: gbToBytes(100),
     durationSec: 180, // 3 minutes
-    resolution: '7680x4320 (8K Ultra HD)',
+    resolution: '3840x2160 (4K Ultra HD)',
     fps: 60,
-    originalBitrateKbps: 4500000 // 4.5 Gbps
+    originalBitrateKbps: 4500000
   });
 
   // Compression Parameters
@@ -63,7 +63,7 @@ export function VideoCompressor({ onCompressionComplete, permissions, openPermis
     setSelectedFile(null);
     setIsDemoMode(true);
     setFileDetails({
-      name: 'RAW_8K_CINEMATIC_MASTER_100GB.mov',
+      name: 'SAMPLE_VIDEO_MASTER_100GB.mov',
       sizeBytes: gbToBytes(100),
       durationSec: 180,
       resolution: '7680x4320 (8K Ultra HD)',

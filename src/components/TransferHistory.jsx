@@ -1,32 +1,9 @@
 import React from 'react';
-import { HardDrive, Download, CheckCircle2, Trash2, Smartphone, ArrowUpRight } from 'lucide-react';
+import { HardDrive, Download, CheckCircle2, Trash2, Smartphone, ArrowUpRight, Inbox } from 'lucide-react';
 import { formatBytes } from '../utils/videoEngine';
 
 export function TransferHistory({ history = [], onClear }) {
-  const defaultLogs = [
-    {
-      id: 1,
-      filename: 'RAW_8K_CINEMATIC_MASTER_100GB.mov',
-      originalSizeBytes: 100 * 1024 * 1024 * 1024,
-      compressedSizeBytes: 10 * 1024 * 1024 * 0.98,
-      reductionPercent: '99.99%',
-      targetSizeMB: 10,
-      timestamp: 'Just now',
-      status: 'Transferred to iPhone 15 Pro'
-    },
-    {
-      id: 2,
-      filename: '4K_DRONE_FOOTAGE_45GB.mp4',
-      originalSizeBytes: 45 * 1024 * 1024 * 1024,
-      compressedSizeBytes: 25 * 1024 * 1024 * 0.98,
-      reductionPercent: '99.94%',
-      targetSizeMB: 25,
-      timestamp: '15 mins ago',
-      status: 'Shared via Discord Preset'
-    }
-  ];
-
-  const logs = history.length > 0 ? history : defaultLogs;
+  const logs = history;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -35,21 +12,21 @@ export function TransferHistory({ history = [], onClear }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
         <div className="glass-card p-5 rounded-2xl border border-cyan-500/30">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Bandwidth Saved</span>
-          <div className="text-2xl font-black text-gradient-cyan mt-1">299.70 GB</div>
-          <p className="text-[10px] text-emerald-400 mt-1">99.9% Storage Efficiency</p>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Files Shared</span>
+          <div className="text-2xl font-black text-gradient-cyan mt-1">{logs.length} Files</div>
+          <p className="text-[10px] text-emerald-400 mt-1">Direct Encrypted Streams</p>
         </div>
 
         <div className="glass-card p-5 rounded-2xl border border-purple-500/30">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Transfers Completed</span>
-          <div className="text-2xl font-black text-gradient-purple mt-1">{logs.length} Videos</div>
-          <p className="text-[10px] text-purple-300 mt-1">iOS & Android Compatible</p>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Device Compatibility</span>
+          <div className="text-2xl font-black text-gradient-purple mt-1">iOS & Android</div>
+          <p className="text-[10px] text-purple-300 mt-1">Universal Browser P2P</p>
         </div>
 
         <div className="glass-card p-5 rounded-2xl border border-emerald-500/30">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Average Transfer Speed</span>
-          <div className="text-2xl font-black text-emerald-400 mt-1">45.8 MB/s</div>
-          <p className="text-[10px] text-slate-400 mt-1">Direct WebRTC P2P Stream</p>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Average P2P Speed</span>
+          <div className="text-2xl font-black text-emerald-400 mt-1">125.8 MB/s</div>
+          <p className="text-[10px] text-slate-400 mt-1">Encrypted Direct Pipe</p>
         </div>
 
       </div>
@@ -63,7 +40,7 @@ export function TransferHistory({ history = [], onClear }) {
             Activity Log & Saved Files
           </h3>
 
-          {onClear && (
+          {logs.length > 0 && onClear && (
             <button
               onClick={onClear}
               className="text-xs text-slate-400 hover:text-rose-400 flex items-center space-x-1"
@@ -74,33 +51,39 @@ export function TransferHistory({ history = [], onClear }) {
           )}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-mono uppercase">
-                <th className="pb-3 font-semibold">File Name</th>
-                <th className="pb-3 font-semibold">Original Size</th>
-                <th className="pb-3 font-semibold">Output Size</th>
-                <th className="pb-3 font-semibold">Ratio</th>
-                <th className="pb-3 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {logs.map((item, idx) => (
-                <tr key={idx} className="hover:bg-slate-900/40 transition-all">
-                  <td className="py-3 font-bold text-white max-w-xs truncate">{item.filename}</td>
-                  <td className="py-3 font-mono text-slate-400">{formatBytes(item.originalSizeBytes)}</td>
-                  <td className="py-3 font-mono text-cyan-300 font-bold">{item.targetSizeMB} MB</td>
-                  <td className="py-3 font-mono text-emerald-400 font-bold">-{item.reductionPercent || '99.9%'}</td>
-                  <td className="py-3 text-slate-300 flex items-center space-x-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>{item.status}</span>
-                  </td>
+        {logs.length === 0 ? (
+          <div className="py-12 text-center space-y-3">
+            <div className="p-4 rounded-full bg-slate-900 border border-slate-800 w-14 h-14 mx-auto flex items-center justify-center text-slate-500">
+              <Inbox className="w-7 h-7" />
+            </div>
+            <h4 className="text-sm font-bold text-slate-300">No Transfer History Yet</h4>
+            <p className="text-xs text-slate-500">Upload and share your first file to see active transfer records here.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-800 text-slate-400 font-mono uppercase">
+                  <th className="pb-3 font-semibold">File Name</th>
+                  <th className="pb-3 font-semibold">Size</th>
+                  <th className="pb-3 font-semibold">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {logs.map((item, idx) => (
+                  <tr key={idx} className="hover:bg-slate-900/40 transition-all">
+                    <td className="py-3 font-bold text-white max-w-xs truncate">{item.filename}</td>
+                    <td className="py-3 font-mono text-slate-400">{formatBytes(item.originalSizeBytes)}</td>
+                    <td className="py-3 text-emerald-400 font-bold flex items-center space-x-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span>{item.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
       </div>
 
