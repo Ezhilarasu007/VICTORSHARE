@@ -9,7 +9,7 @@ export function AdminDashboard({ onBackHome }) {
   const [showPin, setShowPin] = useState(false);
 
   // Admin Payout State
-  const [payoutMethod, setPayoutMethod] = useState('upi'); // 'upi' or 'bank'
+  const [payoutMethod, setPayoutMethod] = useState('upi');
   const [upiId, setUpiId] = useState('arasu9629hf@okhdfcbank');
   const [accountName, setAccountName] = useState('Ezhilarasu');
   const [accountNumber, setAccountNumber] = useState('9876543210123');
@@ -17,10 +17,16 @@ export function AdminDashboard({ onBackHome }) {
   const [withdrawAmount, setWithdrawAmount] = useState('25000');
   const [payoutSuccess, setPayoutSuccess] = useState(false);
 
-  // Secret PIN Verification (Pin: 20032004)
+  // Live Monetization Engine Data
+  const cpmRate = 185; // ₹185 per 1000 impressions
+  const rpmRate = 320; // ₹320 per 1000 video streams
+  const totalImpressions = 142800;
+  const totalStreams = 68400;
+  const calculatedRevenue = Math.round((totalImpressions / 1000) * cpmRate + (totalStreams / 1000) * rpmRate);
+
+  // Secret Master PIN Verification (Pin: 20032004)
   const handleLogin = (e) => {
     e.preventDefault();
-    // Validate secret PIN safely without exposing in plain UI text
     const targetPin = String(20030000 + 2004); 
     if (pinInput === targetPin) {
       setIsAuthenticated(true);
@@ -127,9 +133,9 @@ export function AdminDashboard({ onBackHome }) {
             <DollarSign className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-3xl font-black text-white font-mono">
-            ₹48,920 <span className="text-xs text-emerald-400 font-bold">(+$320.50)</span>
+            ₹{calculatedRevenue.toLocaleString()} <span className="text-xs text-emerald-400 font-bold">(+$320.50)</span>
           </div>
-          <div className="text-[11px] text-slate-400 font-mono">AdSense CPM ₹185 / 1k views</div>
+          <div className="text-[11px] text-slate-400 font-mono">CPM ₹{cpmRate} • RPM ₹{rpmRate}</div>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border border-purple-500/40 space-y-2">
@@ -138,7 +144,7 @@ export function AdminDashboard({ onBackHome }) {
             <Activity className="w-4 h-4 text-purple-400" />
           </div>
           <div className="text-3xl font-black text-purple-300 font-mono">
-            1,482 <span className="text-xs text-cyan-400">Streams</span>
+            {totalStreams.toLocaleString()} <span className="text-xs text-cyan-400">Streams</span>
           </div>
           <div className="text-[11px] text-slate-400 font-mono">Avg Stream: 145 MB/s</div>
         </div>
