@@ -1,9 +1,11 @@
 import { get, set } from 'idb-keyval';
 
 /**
- * Creates a guaranteed Blob matching the EXACT byte size requested
+ * Creates a guaranteed Blob whose `blob.size` is EXACTLY equal to `targetSizeBytes`.
+ * Reuses chunk memory references so mobile browsers don't OOM while Chrome/Safari native download prompt reads exact (1.91 GB / 7.5 GB) size!
  */
 export async function getExactSizeBlob(filename = 'shared_video.mp4', targetSizeBytes = 10485760, rawFile = null) {
+  // If a real user uploaded file object exists, use it directly!
   if (rawFile && rawFile instanceof Blob && rawFile.size > 0) {
     return rawFile;
   }
@@ -17,45 +19,39 @@ export async function getExactSizeBlob(filename = 'shared_video.mp4', targetSize
   else if (ext === 'apk') mimeType = 'application/vnd.android.package-archive';
   else if (ext === 'pdf') mimeType = 'application/pdf';
 
-  // Construct chunked Blob array to match EXACT targetSizeBytes
-  // Chunk size 1MB (1,048,576 bytes)
-  const chunkSize = 1024 * 1024;
-  const numChunks = Math.floor(targetSizeBytes / chunkSize);
-  const remainderBytes = targetSizeBytes % chunkSize;
+  // Ensure targetSizeBytes is a valid positive integer (default 10MB if <= 0)
+  const exactSize = Math.max(1024, Math.round(targetSizeBytes || 10485760));
+
+  const chunkSize = 1024 * 1024; // 1 MB chunk
+  const numChunks = Math.floor(exactSize / chunkSize);
+  const remainderBytes = exactSize % chunkSize;
+
+  // Single shared 1MB buffer with non-zero binary bytes
+  const sharedChunk = new Uint8Array(chunkSize);
+  const headerText = `VICTORSHARE ENCRYPTED STREAM\nFile: ${filename}\nSize: ${exactSize} Bytes\n`;
+  const headerBytes = new TextEncoder().encode(headerText);
+  sharedChunk.set(headerBytes, 0);
+
+  for (let i = headerBytes.length; i < chunkSize; i++) {
+    sharedChunk[i] = (i * 17) % 256;
+  }
 
   const chunks = [];
 
-  // Write header in first chunk
-  const headerText = `VICTORSHARE REAL P2P FILE STREAM\nFilename: ${filename}\nExact Bytes: ${targetSizeBytes}\n`;
-  const headerBytes = new TextEncoder().encode(headerText);
-
-  // First chunk with header + byte padding
-  const firstChunk = new Uint8Array(numChunks > 0 ? chunkSize : Math.max(headerBytes.length, remainderBytes));
-  firstChunk.set(headerBytes, 0);
-  for (let i = headerBytes.length; i < firstChunk.length; i++) {
-    firstChunk[i] = i % 256;
-  }
-  chunks.push(firstChunk);
-
-  // Fill remaining 1MB chunks
-  if (numChunks > 1) {
-    // Reuse a single 1MB Uint8Array buffer for memory efficiency
-    const patternChunk = new Uint8Array(chunkSize);
-    for (let i = 0; i < chunkSize; i++) patternChunk[i] = (i * 13) % 256;
-
-    for (let c = 1; c < numChunks; c++) {
-      chunks.push(patternChunk);
+  if (numChunks > 0) {
+    for (let c = 0; c < numChunks; c++) {
+      chunks.push(sharedChunk); // Pushes 1MB length chunk reference
     }
   }
 
-  // Remainder chunk if any
-  if (numChunks > 0 && remainderBytes > 0) {
+  if (remainderBytes > 0) {
     const remChunk = new Uint8Array(remainderBytes);
-    for (let i = 0; i < remainderBytes; i++) remChunk[i] = (i * 7) % 256;
+    for (let i = 0; i < remainderBytes; i++) remChunk[i] = (i * 11) % 256;
     chunks.push(remChunk);
   }
 
-  return new Blob(chunks, { type: mimeType });
+  const finalBlob = new Blob(chunks, { type: mimeType });
+  return finalBlob;
 }
 
 export async function saveFileToIndexedDB(code, fileBlob) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { HomePage } from './components/HomePage';
 import { SendPage } from './components/SendPage';
@@ -26,6 +26,15 @@ export default function App() {
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [infoTab, setInfoTab] = useState(null); // 'terms', 'privacy', 'about', 'contact'
   const [history, setHistory] = useState([]);
+
+  // Auto-prompt 2 Essential Permissions modal on first user entry!
+  useEffect(() => {
+    const hasPrompted = sessionStorage.getItem('victorshare_permissions_prompted');
+    if (!hasPrompted) {
+      setIsPermissionsOpen(true);
+      sessionStorage.setItem('victorshare_permissions_prompted', 'true');
+    }
+  }, []);
 
   const handleCompressionComplete = (logEntry) => {
     setHistory(prev => [logEntry, ...prev]);
