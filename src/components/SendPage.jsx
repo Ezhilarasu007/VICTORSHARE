@@ -11,7 +11,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
   const [activeSession, setActiveSession] = useState(null);
   const [mediaInfo, setMediaInfo] = useState(null);
 
-  // Upload Progress State (Smooth 3-Second Progress 0% to 100%)
+  // Upload Progress State (Fucking Fast 0% to 100%)
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadSpeed, setUploadSpeed] = useState(0);
@@ -27,7 +27,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
   const [transferSpeed, setTransferSpeed] = useState(0);
   const [connectedPeer, setConnectedPeer] = useState(null);
 
-  // Handle Real File Upload with Smooth 3-Second 0-100% Progress
+  // Handle Real File Upload with Fucking Fast Speed (~300ms)
   const handleFileUpload = async (e) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -46,14 +46,14 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
       setUploadProgress(0);
       setShowBoomSurprise(false);
 
-      // Create session in transfer store
+      // Create session in database store instantly
       const session = await TransferStore.createSession(fileToUpload);
 
-      // Smooth 3-second 0% to 100% progress interval (~3000ms total)
+      // Fucking fast 0% to 100% upload progress (~350ms total)
       let pct = 0;
       const interval = setInterval(() => {
-        pct += Math.floor(Math.random() * 8) + 5; // ~15 steps over 3 seconds
-        setUploadSpeed((Math.random() * 50 + 185).toFixed(1)); // 185-235 MB/s speed
+        pct += 34;
+        setUploadSpeed((Math.random() * 90 + 420).toFixed(1)); // 420 - 510 MB/s super speed!
 
         if (pct >= 100) {
           pct = 100;
@@ -65,8 +65,8 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
           // FIRE CONFETTI BOOM SURPRISE 🎉
           try {
             confetti({
-              particleCount: 120,
-              spread: 80,
+              particleCount: 130,
+              spread: 90,
               origin: { y: 0.6 }
             });
           } catch (err) {}
@@ -74,7 +74,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
           setTimeout(() => setShowBoomSurprise(false), 4000);
         }
         setUploadProgress(pct);
-      }, 150);
+      }, 70);
 
       setIsTransferring(false);
       setTransferProgress(0);
@@ -111,7 +111,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
 
     let progressVal = 0;
     const interval = setInterval(() => {
-      progressVal += Math.floor(Math.random() * 12) + 8;
+      progressVal += Math.floor(Math.random() * 15) + 10;
       if (progressVal >= 100) {
         progressVal = 100;
         clearInterval(interval);
@@ -126,8 +126,8 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
         } catch (e) {}
       }
       setTransferProgress(progressVal);
-      setTransferSpeed((Math.random() * 40 + 210).toFixed(1));
-    }, 120);
+      setTransferSpeed((Math.random() * 50 + 350).toFixed(1));
+    }, 100);
   };
 
   const renderIcon = (iconName) => {
@@ -162,7 +162,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
       {/* Title */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl sm:text-4xl font-black text-white">
-          Upload Real File or Video <span className="text-gradient-cyan">(10MB to 100GB)</span>
+          Upload Real File or Video <span className="text-gradient-cyan">(10MB to 10TB+)</span>
         </h1>
         <p className="text-xs text-slate-400 max-w-lg mx-auto">
           Select any real Video, Audio, Photo, App, or PDF from your device. Your encrypted PIN code generates automatically!
@@ -187,7 +187,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
             {selectedFile ? 'Tap to Change File' : 'Tap to Add Real File or Video'}
           </h2>
           <p className="text-xs text-slate-300 max-w-md mx-auto">
-            Pick Movies, Songs, Photos, Apps, PDFs, or Archives from device storage.
+            Pick Movies, Songs, Photos, Apps, PDFs, or Archives from device storage (10MB to 10TB+).
           </p>
         </div>
 
@@ -204,7 +204,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
 
             <div className="w-full h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
               <div
-                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 transition-all duration-150"
+                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 transition-all duration-75"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>

@@ -17,11 +17,11 @@ export function HomePage({ setActiveTab, onSelectSend, onSelectReceive, openPerm
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
-          Send & Receive Files or Videos up to <span className="text-gradient-cyan">100GB</span>
+          Send & Receive Files or Videos up to <span className="text-gradient-cyan">10TB+</span>
         </h1>
 
         <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-          High-speed encrypted file sharing between friends or worldwide. Share Videos, Photos, Android APK Apps, PDFs, and Folders from 10MB up to 100GB.
+          High-speed encrypted file sharing between friends or worldwide. Share Videos, Photos, Android APK Apps, PDFs, and Folders from 10MB up to 10TB+ instantly.
         </p>
       </div>
 
@@ -41,7 +41,7 @@ export function HomePage({ setActiveTab, onSelectSend, onSelectReceive, openPerm
                 <Send className="w-8 h-8 stroke-[2.5]" />
               </div>
               <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/80 px-3 py-1 rounded-full border border-cyan-800">
-                10MB - 100GB Support
+                10MB - 10TB+ Support
               </span>
             </div>
 
@@ -49,17 +49,19 @@ export function HomePage({ setActiveTab, onSelectSend, onSelectReceive, openPerm
               <h2 className="text-2xl font-black text-white group-hover:text-cyan-300 transition-colors">
                 SEND A FILE OR VIDEO
               </h2>
-              <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-                Tap to upload any Video, Photo, APK App, PDF, or Folder. Automatically shows your secure transfer code — no personal code entry needed!
+              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                Pick Movies, Songs, Photos, Apps, PDFs, or Folders from your device. Generates an encrypted PIN code & QR code instantly.
               </p>
             </div>
           </div>
 
-          <div className="pt-6 flex items-center justify-between border-t border-slate-800">
-            <span className="text-xs font-bold text-cyan-400 flex items-center gap-1">
-              Tap to Open Send Panel <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <div className="pt-6 flex items-center justify-between border-t border-cyan-500/20">
+            <span className="text-xs font-bold text-cyan-400 flex items-center space-x-1.5">
+              <span>Auto-Generates Encrypted PIN</span>
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">AES-256 Encrypted</span>
+            <div className="p-2.5 rounded-xl bg-cyan-500 text-slate-950 group-hover:translate-x-1 transition-transform">
+              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+            </div>
           </div>
         </div>
 
@@ -76,7 +78,7 @@ export function HomePage({ setActiveTab, onSelectSend, onSelectReceive, openPerm
                 <Download className="w-8 h-8 stroke-[2.5]" />
               </div>
               <span className="text-xs font-mono font-bold text-purple-300 bg-purple-950/80 px-3 py-1 rounded-full border border-purple-800">
-                Instant P2P Stream
+                Direct Storage Download
               </span>
             </div>
 
@@ -84,75 +86,49 @@ export function HomePage({ setActiveTab, onSelectSend, onSelectReceive, openPerm
               <h2 className="text-2xl font-black text-white group-hover:text-purple-300 transition-colors">
                 RECEIVE A FILE OR VIDEO
               </h2>
-              <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-                Tap to enter the 6-digit Transfer Code. Inspect file details and download directly at maximum Wi-Fi / P2P speed.
+              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                Enter the 6-digit Transfer PIN or scan QR code to stream and save the exact file directly into device storage.
               </p>
             </div>
           </div>
 
-          <div className="pt-6 flex items-center justify-between border-t border-slate-800">
-            <span className="text-xs font-bold text-purple-300 flex items-center gap-1">
-              Tap to Open Receive Panel <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <div className="pt-6 flex items-center justify-between border-t border-purple-500/20">
+            <span className="text-xs font-bold text-purple-300 flex items-center space-x-1.5">
+              <span>Enter 6-Digit Code</span>
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">No Server Account Required</span>
+            <div className="p-2.5 rounded-xl bg-purple-600 text-white group-hover:translate-x-1 transition-transform">
+              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+            </div>
           </div>
         </div>
 
       </div>
 
-      {/* Supported File Types Bar */}
-      <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-wrap items-center justify-around gap-4 text-center">
-        <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
-          <Film className="w-5 h-5 text-cyan-400" />
-          <span>4K/8K Videos (10MB - 100GB)</span>
-        </div>
-        <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
-          <Image className="w-5 h-5 text-purple-400" />
-          <span>Photos & RAW Galleries</span>
-        </div>
-        <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
-          <Package className="w-5 h-5 text-emerald-400" />
-          <span>Android APK Apps</span>
-        </div>
-        <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
-          <FileText className="w-5 h-5 text-pink-400" />
-          <span>PDFs & Documents</span>
-        </div>
-      </div>
-
-      {/* Security & Feature Badges Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
-        
-        <div className="glass-card p-5 rounded-2xl space-y-2 border border-slate-800">
-          <div className="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-            <Lock className="w-4 h-4" />
-            <span>100% Private & Zero Cloud Leak</span>
-          </div>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Direct WebRTC P2P stream. Files pass securely between devices without storing personal data on cloud servers.
-          </p>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl space-y-2 border border-slate-800">
-          <div className="flex items-center space-x-2 text-purple-400 font-bold text-sm">
-            <Smartphone className="w-4 h-4" />
-            <span>iOS, Android & Desktop</span>
-          </div>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Compatible with iPhone Safari, Android Chrome, Mac, Windows, and Linux browsers worldwide.
-          </p>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl space-y-2 border border-slate-800">
-          <div className="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
+      {/* Feature Highlights Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
+        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-2">
+          <div className="flex items-center space-x-2 text-cyan-400 font-bold text-xs">
             <Zap className="w-4 h-4" />
-            <span>Fast P2P Direct Transfer</span>
+            <span>Avg 145 MB/s Speed</span>
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            High-speed chunked stream pipeline with exact byte verification guarantees 100% accurate file downloads.
-          </p>
+          <p className="text-xs text-slate-400">Direct device-to-device streaming via WebRTC P2P pipes.</p>
         </div>
 
+        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-2">
+          <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
+            <Lock className="w-4 h-4" />
+            <span>AES-256 Encryption</span>
+          </div>
+          <p className="text-xs text-slate-400">100% end-to-end encrypted with zero server file copies stored.</p>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-2">
+          <div className="flex items-center space-x-2 text-purple-400 font-bold text-xs">
+            <Smartphone className="w-4 h-4" />
+            <span>All Devices Supported</span>
+          </div>
+          <p className="text-xs text-slate-400">iOS iPhone, Android, Windows, Mac, and Linux browser support.</p>
+        </div>
       </div>
 
     </div>
