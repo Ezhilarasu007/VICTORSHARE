@@ -1,50 +1,118 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Upload, HardDrive, Lock, ShieldCheck, Copy, Check, Radio, Send, CheckCircle2, RefreshCw, Smartphone, ArrowLeft, Sparkles } from 'lucide-react';
+import { Upload, HardDrive, Lock, ShieldCheck, Copy, Check, Radio, Send, CheckCircle2, RefreshCw, Smartphone, ArrowLeft, Sparkles, Folder, Image, Film, FileText, Clock } from 'lucide-react';
 import { formatBytes, gbToBytes } from '../utils/videoEngine';
 
 export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
+  // File state (Supports video, image, folder, document up to 100GB)
   const [selectedFile, setSelectedFile] = useState({
     name: 'RAW_8K_CINEMATIC_MASTER_100GB.mov',
+    type: 'video', // 'video' | 'image' | 'folder' | 'document'
     sizeBytes: gbToBytes(100),
+    itemCount: 1,
     isDemo: true
   });
 
+  // 2-Minute Auto-Generating Dynamic PIN Code System
   const [pairingPin, setPairingPin] = useState('325-600');
+  const [timeLeft, setTimeLeft] = useState(120); // 120 seconds (2 mins)
   const [isCopied, setIsCopied] = useState(false);
+
+  // Transfer State
   const [isTransferring, setIsTransferring] = useState(false);
   const [transferProgress, setTransferProgress] = useState(0);
   const [transferSpeed, setTransferSpeed] = useState(0);
   const [connectedPeer, setConnectedPeer] = useState(null);
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile({
-        name: file.name,
-        sizeBytes: file.size,
-        isDemo: false,
-        rawFile: file
+  // Function to generate fresh 6-digit PIN
+  const generateFreshPin = () => {
+    const p1 = Math.floor(100 + Math.random() * 900);
+    const p2 = Math.floor(100 + Math.random() * 900);
+    const newPin = `${p1}-${p2}`;
+    setPairingPin(newPin);
+    setTimeLeft(120); // Reset to 2 minutes
+  };
+
+  // Countdown timer effect for 2 minutes auto-refresh
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          generateFreshPin();
+          return 120;
+        }
+        return prev - 1;
       });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleFileUpload = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      if (files.length > 1) {
+        // Folder / Multiple Files
+        let totalBytes = 0;
+        for (let i = 0; i < files.length; i++) totalBytes += files[i].size;
+        setSelectedFile({
+          name: `📁 Shared_Folder_Bundle (${files.length} items)`,
+          type: 'folder',
+          sizeBytes: totalBytes,
+          itemCount: files.length,
+          isDemo: false
+        });
+      } else {
+        const file = files[0];
+        const type = file.type.startsWith('video')
+          ? 'video'
+          : file.type.startsWith('image')
+          ? 'image'
+          : 'document';
+        setSelectedFile({
+          name: file.name,
+          type,
+          sizeBytes: file.size,
+          itemCount: 1,
+          isDemo: false,
+          rawFile: file
+        });
+      }
       setIsTransferring(false);
       setTransferProgress(0);
+      generateFreshPin(); // Generate new 2-min PIN on new upload
     }
   };
 
-  const loadSampleFile = (gbSize, name) => {
-    setSelectedFile({
-      name: name || `SAMPLE_VIDEO_${gbSize}GB.mp4`,
-      sizeBytes: gbToBytes(gbSize),
-      isDemo: true
-    });
+  const loadPresetFile = (type) => {
+    if (type === '100gb') {
+      setSelectedFile({
+        name: '🎬 RAW_8K_CINEMATIC_MASTER_100GB.mov',
+        type: 'video',
+        sizeBytes: gbToBytes(100),
+        itemCount: 1,
+        isDemo: true
+      });
+    } else if (type === 'folder') {
+      setSelectedFile({
+        name: '📁 PROJECT_ASSETS_FOLDER (48 files)',
+        type: 'folder',
+        sizeBytes: gbToBytes(4.5),
+        itemCount: 48,
+        isDemo: true
+      });
+    } else if (type === 'image') {
+      setSelectedFile({
+        name: '📸 ULTRA_HD_GALLERY_ALBUM.zip',
+        type: 'image',
+        sizeBytes: gbToBytes(0.8),
+        itemCount: 150,
+        isDemo: true
+      });
+    }
     setIsTransferring(false);
     setTransferProgress(0);
-  };
-
-  const handleGenerateNewPin = () => {
-    const p1 = Math.floor(100 + Math.random() * 900);
-    const p2 = Math.floor(100 + Math.random() * 900);
-    setPairingPin(`${p1}-${p2}`);
+    generateFreshPin();
   };
 
   const handleCopyPin = () => {
@@ -53,7 +121,7 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const simulateRecipientConnect = (peerName = 'iPhone 15 Pro (iOS)') => {
+  const simulateRecipientConnect = (peerName = 'iPhone 15 Pro (iOS Safari)') => {
     if (!permissions.network || !permissions.storage) {
       openPermissionsModal();
       return;
@@ -64,41 +132,56 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
     setTransferProgress(0);
 
     let progressVal = 0;
-    const timer = setInterval(() => {
+    const interval = setInterval(() => {
       progressVal += Math.floor(Math.random() * 8) + 4;
       if (progressVal >= 100) {
         progressVal = 100;
-        clearInterval(timer);
+        clearInterval(interval);
         setIsTransferring(false);
       }
       setTransferProgress(progressVal);
-      setTransferSpeed((Math.random() * 20 + 35).toFixed(1));
+      setTransferSpeed((Math.random() * 20 + 38).toFixed(1));
     }, 150);
   };
+
+  const formatMinSec = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const getFileIcon = (type) => {
+    if (type === 'folder') return Folder;
+    if (type === 'image') return Image;
+    if (type === 'video') return Film;
+    return FileText;
+  };
+
+  const FileIconComp = getFileIcon(selectedFile.type);
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto px-4 py-6">
       
-      {/* Top Back Navigation & Security Badge */}
+      {/* Back Header */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBackHome}
           className="flex items-center space-x-2 text-slate-400 hover:text-white bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800 transition-all text-xs font-bold"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
+          <span>Back to ShareIt Home</span>
         </button>
 
-        <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold font-mono">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>AES-256 E2EE Private Channel</span>
+        <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold">
+          <ShieldCheck className="w-4 h-4 text-cyan-400" />
+          <span>ShareIt / QuickShare Direct P2P</span>
         </div>
       </div>
 
-      {/* Upload Header */}
+      {/* Title */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-black text-white">Send File (10MB up to 100GB)</h1>
-        <p className="text-xs text-slate-400">Upload your file to generate your 6-digit pairing PIN code.</p>
+        <h1 className="text-3xl font-black text-white">ShareIt Fast Send (10MB to 100GB)</h1>
+        <p className="text-xs text-slate-400">Tap to upload files or folders. A new PIN automatically generates every 2 minutes.</p>
       </div>
 
       {/* Step 1: Big Tap to Upload Dropzone */}
@@ -106,107 +189,119 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
         
         <input
           type="file"
+          multiple
           onChange={handleFileUpload}
           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
         />
 
-        <div className="p-5 rounded-3xl bg-cyan-950/60 border border-cyan-500/40 w-20 h-20 mx-auto flex items-center justify-center shadow-xl shadow-cyan-500/20">
-          <Upload className="w-10 h-10 text-cyan-400 animate-bounce" />
+        <div className="p-5 rounded-3xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 shadow-xl shadow-cyan-500/30 w-20 h-20 mx-auto flex items-center justify-center">
+          <Upload className="w-10 h-10 stroke-[2.5] animate-bounce" />
         </div>
 
         <div className="space-y-1">
-          <h2 className="text-xl font-extrabold text-white">Tap to Upload File</h2>
-          <p className="text-xs text-slate-400">Supports Video, Archives, Images, and Documents from 10MB to 100GB</p>
+          <h2 className="text-2xl font-black text-white">Tap to Upload File or Folder</h2>
+          <p className="text-xs text-slate-300 max-w-md mx-auto">
+            Select Videos, Photos, Folders, or Documents up to 100GB to share instantly.
+          </p>
         </div>
 
-        {/* Selected File Details */}
+        {/* Selected File Card Badge */}
         {selectedFile && (
-          <div className="inline-flex items-center space-x-3 px-5 py-2.5 rounded-2xl bg-slate-900 border border-cyan-500/50 text-xs font-mono font-bold text-cyan-300 z-20 relative">
-            <HardDrive className="w-4 h-4 text-cyan-400" />
-            <span>{selectedFile.name}</span>
-            <span className="text-white bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
-              {formatBytes(selectedFile.sizeBytes)}
-            </span>
+          <div className="inline-flex items-center space-x-3 px-5 py-3 rounded-2xl bg-slate-950 border border-cyan-500/50 text-xs font-bold text-white shadow-xl z-20 relative">
+            <FileIconComp className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+            <div className="text-left">
+              <div className="font-extrabold text-cyan-300 truncate max-w-xs">{selectedFile.name}</div>
+              <div className="text-[10px] text-slate-400 font-mono">
+                Size: {formatBytes(selectedFile.sizeBytes)} • {selectedFile.itemCount} item(s)
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Quick Sample File Switcher */}
+        {/* Preset Sample Selector */}
         <div className="pt-2 z-20 relative flex flex-wrap items-center justify-center gap-2">
           <button
             type="button"
-            onClick={() => loadSampleFile(100, 'RAW_8K_CINEMATIC_MASTER_100GB.mov')}
-            className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] font-bold text-slate-300"
+            onClick={() => loadPresetFile('100gb')}
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200"
           >
-            Load 100GB Demo File
+            🎬 Load 100GB Movie File
           </button>
+
           <button
             type="button"
-            onClick={() => loadSampleFile(10, '4K_FOOTAGE_10GB.mp4')}
-            className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] font-bold text-slate-300"
+            onClick={() => loadPresetFile('folder')}
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200"
           >
-            Load 10GB File
+            📁 Load Project Folder (4.5GB)
           </button>
+
           <button
             type="button"
-            onClick={() => loadSampleFile(0.01, 'COMPRESSED_10MB_VIDEO.mp4')}
-            className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] font-bold text-slate-300"
+            onClick={() => loadPresetFile('image')}
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200"
           >
-            Load 10MB File
+            📸 Load Photo Album
           </button>
         </div>
 
       </div>
 
-      {/* Step 2: Generated 6-Digit PIN & Pairing Info */}
+      {/* Step 2: 2-Minute Dynamic Auto-Refreshing PIN & QR Code */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
-        {/* Left: PIN Code Display */}
-        <div className="glass-card p-6 rounded-3xl space-y-6 text-center border border-cyan-500/30">
+        {/* Left: Dynamic 2-Minute PIN Display */}
+        <div className="glass-card p-6 rounded-3xl space-y-6 text-center border border-cyan-500/40 relative">
+          
           <div>
-            <span className="px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-cyan-400 bg-cyan-950 rounded-full border border-cyan-800">
-              Share This PIN Code
-            </span>
-            <h3 className="text-lg font-bold text-white mt-2">6-Digit Pairing PIN</h3>
-            <p className="text-xs text-slate-400">Recipient enters this PIN on their device to download.</p>
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-950 border border-cyan-500/50 text-[10px] font-mono font-bold text-cyan-300">
+              <Clock className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
+              <span>Auto-Refreshes Every 2 Mins ({formatMinSec(timeLeft)})</span>
+            </div>
+
+            <h3 className="text-xl font-black text-white mt-3">Dynamic 6-Digit Share PIN</h3>
+            <p className="text-xs text-slate-400">Share this code with recipient to view file details and download.</p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-            <div className="font-mono text-4xl font-black text-gradient-cyan tracking-widest">
+          {/* Huge PIN Display */}
+          <div className="p-6 rounded-2xl bg-slate-950 border-2 border-cyan-500/60 space-y-3 shadow-inner">
+            <div className="font-mono text-5xl font-black text-gradient-cyan tracking-widest">
               {pairingPin}
             </div>
 
-            <div className="flex items-center justify-center space-x-2">
+            <div className="flex items-center justify-center space-x-2 pt-1">
               <button
                 onClick={handleCopyPin}
-                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 flex items-center space-x-1.5"
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 flex items-center space-x-1.5 transition-all"
               >
-                {isCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                {isCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-cyan-400" />}
                 <span>{isCopied ? 'PIN Copied!' : 'Copy PIN'}</span>
               </button>
 
               <button
-                onClick={handleGenerateNewPin}
-                className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-400 hover:text-white"
-                title="Refresh PIN"
+                onClick={generateFreshPin}
+                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-cyan-300 flex items-center space-x-1"
+                title="Generate New PIN Now"
               >
                 <RefreshCw className="w-4 h-4" />
+                <span>New PIN</span>
               </button>
             </div>
           </div>
 
           <div className="text-[11px] text-slate-500">
-            PIN valid for current session • No server logs
+            Secure PIN auto-expires in {timeLeft} seconds for maximum privacy.
           </div>
+
         </div>
 
-        {/* Right: QR Code & Active Recipient Listener */}
+        {/* Right: ShareIt Radar & QR Code */}
         <div className="glass-card p-6 rounded-3xl space-y-6 text-center border border-slate-800">
           <div>
-            <h3 className="text-lg font-bold text-white">Scan QR Code or Test Transfer</h3>
-            <p className="text-xs text-slate-400">Mobile camera scan or simulate connected recipient</p>
+            <h3 className="text-xl font-black text-white">ShareIt Quick QR Scan</h3>
+            <p className="text-xs text-slate-400">Scan with mobile camera or test fast connection</p>
           </div>
 
-          {/* QR Code */}
           <div className="inline-block p-4 rounded-2xl bg-white shadow-2xl border-4 border-cyan-400">
             <QRCodeSVG
               value={`https://victorshare.vercel.app/receive?pin=${pairingPin.replace('-', '')}`}
@@ -216,25 +311,22 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
             />
           </div>
 
-          {/* Recipient Status / Trigger button */}
-          <div className="space-y-3">
-            <button
-              onClick={() => simulateRecipientConnect('iPhone 15 Pro (iOS Safari)')}
-              disabled={isTransferring}
-              className="w-full py-3 rounded-xl btn-gradient-primary text-xs font-bold shadow-lg shadow-cyan-500/20"
-            >
-              {isTransferring ? 'Transferring File...' : 'Simulate Recipient Connect (iPhone 15 Pro)'}
-            </button>
-          </div>
+          <button
+            onClick={() => simulateRecipientConnect('Galaxy S24 Ultra (Android Chrome)')}
+            disabled={isTransferring}
+            className="w-full py-3.5 rounded-xl btn-gradient-primary text-xs font-bold shadow-lg shadow-cyan-500/20"
+          >
+            {isTransferring ? 'Fast P2P Stream Active...' : 'Simulate Recipient Connect (Galaxy S24 Ultra)'}
+          </button>
         </div>
 
       </div>
 
-      {/* Active Transfer Stream Progress Bar */}
+      {/* Active P2P Stream Monitor */}
       {isTransferring && (
-        <div className="glass-panel p-6 rounded-3xl border border-cyan-500/40 space-y-4 animate-fade-in">
+        <div className="glass-panel p-6 rounded-3xl border border-cyan-500/50 space-y-4 animate-fade-in">
           <div className="flex items-center justify-between text-xs font-mono">
-            <span className="text-cyan-300 font-bold">Transferring to {connectedPeer}...</span>
+            <span className="text-cyan-300 font-bold">Fast Transfer to {connectedPeer}</span>
             <span className="text-emerald-400 font-bold">{transferSpeed} MB/s</span>
           </div>
 
@@ -246,20 +338,20 @@ export function SendPage({ onBackHome, permissions, openPermissionsModal }) {
           </div>
 
           <div className="flex justify-between text-xs font-mono text-slate-400">
-            <span>Progress: {transferProgress}%</span>
-            <span>File: {selectedFile ? formatBytes(selectedFile.sizeBytes) : '100 GB'}</span>
+            <span>{transferProgress}% Transferred</span>
+            <span>{selectedFile.name} ({formatBytes(selectedFile.sizeBytes)})</span>
           </div>
         </div>
       )}
 
-      {/* Completion Notification */}
+      {/* Transfer Finish Notification */}
       {transferProgress === 100 && !isTransferring && (
         <div className="p-5 rounded-2xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-sm font-bold flex items-center space-x-3">
           <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
           <div>
-            <h4>File Sent Successfully!</h4>
+            <h4>Fast Share Complete!</h4>
             <p className="text-xs text-slate-300 font-mono font-normal">
-              Recipient safely downloaded {selectedFile ? formatBytes(selectedFile.sizeBytes) : '100GB'}.
+              {selectedFile.name} was successfully received by peer device.
             </p>
           </div>
         </div>
